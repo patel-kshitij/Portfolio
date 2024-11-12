@@ -22,28 +22,11 @@
 
 .shootingStarTail {
     height: 4px;
-    background: linear-gradient(
-            to left,
-            rgba(0, 0, 0, 1) 0%,      /* White, fully opaque */
-            rgba(255, 255, 255, 1) 100%     /* White, fully transparent */
-    );
+    background: linear-gradient(to left, rgba(0, 0, 0, 1) 0%, rgba(255, 255, 255, 1) 100% );
     opacity: 0.4;
     transform-origin: left;
     margin-left: -2px;
 }
-//.fading-line::after {
-//    content: "";
-//    position: absolute;
-//    right: 0;
-//    top: 0;
-//    height: 1px;              /* Minimum height at the ending point */
-//    width: 100%;
-//    background: linear-gradient(
-//            to left,
-//            rgba(0, 0, 0, 0) 0%,          /* Black, fully transparent */
-//            rgba(0, 0, 0, 0.5) 100%       /* Black, partially transparent */
-//    );
-//}
 
 .shootingStar {
     width: 4px;

@@ -5,7 +5,7 @@ import shootingStarConfig from '../config/shootingStarConfig';
 import styles from '../styles/ShootingStar.module.scss';
 
 const ShootingStar: React.FC = () => {
-    const [shootingStars, setShootingStars] = useState<JSX.Element[]>([]);
+    const [shootingStars, setShootingStars] = useState<React.ReactElement[]>([]);
 
     useEffect(() => {
         const createShootingStar = () => {
@@ -16,7 +16,7 @@ const ShootingStar: React.FC = () => {
             const endTop = screenHeight;
             const endLeft = 0;
 
-            const angle = Math.atan2(endTop - 0, endLeft - startLeft) * (180 / Math.PI); // Calculate angle for the tail
+            const angle = Math.atan2(endTop, endLeft - startLeft) * (180 / Math.PI); // Calculate angle for the tail
 
             const shootingStarElement = (
                 <div

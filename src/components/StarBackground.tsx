@@ -6,11 +6,11 @@ import styles from '../styles/StarBackground.module.scss';
 import clsx from 'clsx';
 
 const StarBackground: React.FC = () => {
-    const [stars, setStars] = useState<JSX.Element[]>([]);
+    const [stars, setStars] = useState<React.ReactElement[]>([]);
 
     useEffect(() => {
         const createStars = () => {
-            const starElements: JSX.Element[] = [];
+            const starElements: React.ReactElement[] = [];
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
             const starCount = getStarCount(screenWidth);
