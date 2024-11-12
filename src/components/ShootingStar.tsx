@@ -1,8 +1,8 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
-import shootingStarConfig from '../config/shootingStarConfig';
-import styles from '../styles/ShootingStar.module.scss';
+import shootingStarConfig from '@/config/shootingStarConfig';
+import styles from '@/styles/ShootingStar.module.scss';
 
 const ShootingStar: React.FC = () => {
     const [shootingStars, setShootingStars] = useState<React.ReactElement[]>([]);

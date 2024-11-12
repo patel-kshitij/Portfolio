@@ -1,8 +1,8 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
-import starConfig from '../config/starsConfig';
-import styles from '../styles/StarBackground.module.scss';
+import starConfig from '@/config/starsConfig';
+import styles from '@/styles/StarBackground.module.scss';
 import clsx from 'clsx';
 
 const StarBackground: React.FC = () => {

@@ -1,18 +1,19 @@
 import React from 'react';
 import StarBackground from '@/components/StarBackground';
 import ShootingStar from "@/components/ShootingStar";
+import Greeting from "@/components/Greeting";
+import styles from '@/styles/index.module.scss';
 
-const HomePage: React.FC = () => {
+const IndexPage: React.FC = () => {
     return (
-        <>
+        <div className={styles.pageWrapper}>
             <StarBackground />
             <ShootingStar />
-            <div>
-                <h1>Hi! I&#39;m Kshitij Patel</h1>
-                {/* Add your other homepage content here */}
+            <div className={styles.greetingWrapper}>
+                <Greeting />
             </div>
-        </>
+        </div>
     );
 };
 
-export default HomePage;
+export default IndexPage;
