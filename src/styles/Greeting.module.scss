@@ -9,28 +9,26 @@
     height: fit-content;
     font-family: 'JetBrains Mono', monospace;
     margin: auto;
+    border-radius: 12px;
 }
 
 .greetingContainer {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
     color: #EEEEEE;
 }
 
 .iconsContainer {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     opacity: 0;
     animation: fadeIn 2s ease-in-out 2s forwards;
     z-index: 1;
 }
 
 .icon {
-    width: 24px;
-    height: 24px;
+    width: 40px;
+    height: 40px;
     stroke: #9B7EBD;
 }
 
@@ -45,19 +43,18 @@
     width: 0;
     height: 2px;
     background-color: #D4BEE4;
-    margin-bottom: 1rem;
     transition: width 1.5s ease-in-out;
 }
 
 .lineAnimated {
-    width: 200px;
+    width: 310px;
 }
 
 .greetingText {
     font-size: 2rem;
     opacity: 0;
+    margin: 1rem 0 1rem 0;
     transition: opacity 1s ease-in-out;
-    text-align: center;
 }
 
 .textVisible {
@@ -71,7 +68,7 @@
 }
 
 .arrowButton {
-    margin-top: 1.5rem;
+    padding: 0;
     background: none;
     border: none;
     cursor: pointer;

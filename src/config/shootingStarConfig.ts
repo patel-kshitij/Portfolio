@@ -6,8 +6,8 @@ export interface ShootingStarConfig {
 }
 
 const shootingStarConfig: ShootingStarConfig = {
-    frequencySeconds: 15,
-    speed: 200, // Fixed speed for shooting star, 20 seconds
+    frequencySeconds: 3,
+    speed: 20, // Fixed speed for shooting star, 20 seconds
     trailLength: 20, // Length of the trail, configurable
     frequencyRandomness: 5, // Randomness in the range of +/-5 seconds
 };
