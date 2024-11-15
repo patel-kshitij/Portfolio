@@ -1,10 +1,33 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
-import styles from '../styles/AboutMe.module.scss';
+import styles from '../styles/Projects.module.scss';
 import {useRouter} from "next/navigation";
 
-const AboutMe: React.FC = () => {
+const projects = [
+    {
+        title: 'SkillSwap',
+        description: 'A Java-Spring, Next.js based web application for connecting local communities\' skills.',
+        link: 'https://github.com/patel-kshitij/Skillswap',
+        technologies: ""
+    },
+    {
+        title: 'Ecomart Backend',
+        description: 'A Django based set of REST APIs for a second-hand marketplace.',
+        link: 'https://github.com/patel-kshitij/Ecomart-be',
+    },
+    {
+        title: 'Serverless Image Processor',
+        description: 'A simple yet efficient image processing API that is completely serverless with Infrastructure as Code.',
+        link: 'https://github.com/patel-kshitij/Serverless-Image-Processing',
+    },
+    {
+        title: 'Player Performance Prediction',
+        description: 'A data science project to predict player performance in upcoming matches for FIFA.',
+    },
+];
+
+const Projects: React.FC = () => {
     const [contentVisible, setContentVisible] = useState(false);
     const [arrowVisible, setArrowVisible] = useState(false);
     const router = useRouter();
@@ -15,15 +38,15 @@ const AboutMe: React.FC = () => {
         }, 500);
         setTimeout(() => {
             setArrowVisible(true);
-        }, 1500);
+        }, 1000);
     }, []);
 
     const handleArrowClick = () => {
-        router.push('/projects');
+        router.push('/contact');
     };
 
     return (
-        <div className={`${styles.aboutMeWrapper} ${contentVisible ? styles.contentVisible : ''}`}>
+        <div className={`${styles.projectsWrapper} ${contentVisible ? styles.contentVisible : ''}`}>
             <div className={styles.headerContainer}>
                 <div className={styles.iconsContainer}>
                     <svg className={styles.icon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
@@ -40,28 +63,23 @@ const AboutMe: React.FC = () => {
                         <line x1="12" y1="8" x2="12" y2="8"></line>
                     </svg>
                 </div>
-                <h1 className={styles.aboutMeText}>About Me</h1>
+                <h1 className={styles.projectsText}>Projects</h1>
             </div>
-            <p className={styles.aboutMeDescription}>
-                I&#39;m 23 years old and a passionate newbie software developer. Sometimes I think I
-                spend more time with my code than with actual people, but hey, code never talks back.
-            </p>
-            <p className={styles.aboutMeDescription}>
-                I&#39;ve worked with several programming languages, including <span style={{color: '#9B7EBD'}}>Python, Java, and Go</span>. Python is my comfort
-                zone, Java makes me feel like a grown-up, and Go? Well, it keeps me on my toes.
-            </p>
-            <p className={styles.aboutMeDescription}>
-                <span style={{color: '#9B7EBD'}}> Problem-solving </span> is where I truly shine. I enjoy tackling complex challenges and breaking them down into
-                elegant, efficient solutions. Whether it&#39;s debugging an issue or architecting a new feature, I love
-                the thrill of solving problems. Plus, there&#39;s nothing like the rush of fixing a bug that has been haunting me for hours—it&#39;s like
-                slaying a dragon, but nerdier.
-            </p>
-            <p className={styles.aboutMeDescription}>
-                When I&#39;m not coding, you&#39;ll find me exploring the world—<span style={{color: '#9B7EBD'}}>traveling </span>to new places, experiencing
-                different cultures, and finding inspiration beyond the screen.  I&#39;m also a massive <span style={{color: '#9B7EBD'}}>foodie</span>; if
-                there&#39;s good food around, you can bet I&#39;m first in line. I also firmly believe that every
-                journey needs a good snack, a questionable playlist and great company.
-            </p>
+            <div className={`${styles.projectsContainer}`}>
+                {projects.map((project, index) => (
+                    <div key={index} className={styles.projectItem}>
+                        {project.link ? (
+                            <a href={project.link} target="_blank" rel="noopener noreferrer"
+                               className={styles.projectLink}>
+                                {project.title}
+                            </a>
+                        ) : (
+                            <span className={styles.projectTitle}>{project.title}</span>
+                        )}
+                        <p className={styles.projectDescription}>{project.description}</p>
+                    </div>
+                ))}
+            </div>
             <button className={`${styles.arrowButton} ${arrowVisible ? styles.arrowVisible : ''}`}
                     onClick={handleArrowClick}>
                 <div className={styles.arrowCircle}>
@@ -76,4 +94,4 @@ const AboutMe: React.FC = () => {
     );
 };
 
-export default AboutMe;
+export default Projects;

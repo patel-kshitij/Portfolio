@@ -8,7 +8,7 @@ const IndexPage: NextPageWithLayout = () => {
         <div className={styles.greetingWrapper}>
             <Greeting />
         </div>
-);
+    );
 };
 
 export default IndexPage;
