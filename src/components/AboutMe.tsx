@@ -15,7 +15,7 @@ const AboutMe: React.FC = () => {
         }, 500);
         setTimeout(() => {
             setArrowVisible(true);
-        }, 1500);
+        }, 1000);
     }, []);
 
     const handleArrowClick = () => {

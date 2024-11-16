@@ -1,19 +1,17 @@
 .projectsWrapper {
     display: flex;
     flex-direction: column;
-    //align-items: center;
     justify-content: center;
-    //margin: auto;
+    margin: auto;
     max-width: 1400px;
     padding: 2rem;
     color: #EEEEEE;
     background: radial-gradient(circle, rgba(59, 30, 84, 0.8) 0%, rgba(59, 30, 84, 0.4) 100%);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
     border-radius: 12px;
-    //max-width: 800px;
     transform: scale(0.8);
     transition: all 1s ease-in-out;
     opacity: 0;
-    overflow: hidden;
     width: 100%;
 }
 
@@ -144,25 +142,25 @@
 }
 
 /* width */
-::-webkit-scrollbar {
+.scrollHider::-webkit-scrollbar {
     width: 10px;
     border-radius: 10px;
 }
 
 /* Track */
-::-webkit-scrollbar-track {
+.scrollHider::-webkit-scrollbar-track {
     background: rgba(212, 190, 228, 1);
     border-radius: 10px;
 }
 
 /* Handle */
-::-webkit-scrollbar-thumb {
+.scrollHider::-webkit-scrollbar-thumb {
     background: rgba(155, 126, 189, 1);
     border-radius: 10px;
 }
 
 /* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
+.scrollHider::-webkit-scrollbar-thumb:hover {
     background: rgba(59, 30, 84, 1);
     border-radius: 10px;
 }

@@ -3,7 +3,7 @@ import Projects from '@/components/Projects';
 import { NextPageWithLayout } from '@/pages/_app';
 import styles from '@/styles/Projects.module.scss'
 
-const AboutPage: NextPageWithLayout = () => {
+const ProjectsPage: NextPageWithLayout = () => {
     return (
         <div className={styles.projectWrapperParent}>
             <Projects />
@@ -11,4 +11,4 @@ const AboutPage: NextPageWithLayout = () => {
     );
 };
 
-export default AboutPage;
+export default ProjectsPage;
