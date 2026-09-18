@@ -21,7 +21,7 @@ const StarBackground: React.FC = () => {
                 const intensity = Math.random() * 0.5 + 0.5; // Random intensity between 0.5 and 1
                 const top = Math.random() * screenHeight;
                 const left = Math.random() * screenWidth;
-                const isBlinking = Math.random() < starConfig.blinkingStarPercentage; // 3% chance of blinking
+                const isBlinking = Math.random() < starConfig.blinkingStarPercentage;
 
                 starElements.push(
                     <div

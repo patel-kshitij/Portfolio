@@ -1,0 +1,38 @@
+// Shared colours, sizes and breakpoints (docs/rules/frontend.md, section "Styles").
+
+// Colours
+$purple-deep: rgba(59, 30, 84, 0.8);
+$purple-deep-soft: rgba(59, 30, 84, 0.4);
+$purple: #9b7ebd;
+$purple-light: #d4bee4;
+$text: #eeeeee;
+$surface: rgba(212, 190, 228, 0.1);
+$arrow-circle: rgba(255, 255, 255, 0.2);
+
+// Sizes
+$radius-item: 8px;
+$text-min: 0.875rem; // 14px, the smallest body text allowed (decision 7)
+
+// Breakpoints
+$bp-medium: 730px; // large phones and small tablets
+$bp-small: 450px; // phones held upright
+$short-screen: 450px; // phones held sideways
+
+// Body text size for every section, stepping down on smaller screens.
+@mixin body-text {
+  font-size: 1.25rem;
+  line-height: 1.5;
+
+  @media (max-width: $bp-medium) {
+    font-size: 1rem;
+  }
+
+  @media (max-width: $bp-small), (max-height: $short-screen) {
+    font-size: $text-min;
+  }
+}
+
+// Width shared by the wide sections (About, Projects).
+@mixin wide-section {
+  width: calc(min(90vw, 1400px) - 2 * var(--card-pad));
+}

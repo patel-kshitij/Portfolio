@@ -21,7 +21,7 @@ const starConfig: StarConfig = {
         medium: 300, // Medium screens have even more stars
         large: 600,  // Larger screens have the most stars
     },
-    blinkingStarPercentage: 0.5, // 3% of the stars will blink
+    blinkingStarPercentage: 0.1, // 10% of the stars will blink
 };
 
 export default starConfig;

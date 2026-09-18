@@ -1,0 +1,175 @@
+@use 'tokens' as t;
+
+// Layout of the stage: the card, its header, the line, the content area and the arrow.
+// Anything with a Motion `layout` prop must not get a CSS transform
+// (docs/rules/frontend.md, "No CSS transforms on the card").
+
+.viewport {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 1rem;
+}
+
+.card {
+  --card-pad: 2rem;
+
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  max-width: 100%;
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  padding: var(--card-pad);
+  overflow: hidden;
+  color: t.$text;
+  background: radial-gradient(circle, t.$purple-deep 0%, t.$purple-deep-soft 100%);
+}
+
+.header {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 1rem;
+}
+
+.icons {
+  display: flex;
+  flex-shrink: 0;
+  color: t.$purple;
+}
+
+.icon {
+  width: 45px;
+  height: 45px;
+}
+
+.title {
+  position: relative;
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: t.$purple-light;
+  white-space: nowrap;
+}
+
+.titleWord {
+  display: inline-block;
+  white-space: pre;
+}
+
+.divider {
+  flex-shrink: 0;
+  align-self: center;
+  height: 2px;
+  margin: 0.75rem 0 1rem;
+  background-color: t.$purple-light;
+}
+
+.content {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: t.$purple transparent;
+}
+
+.arrowRow {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: flex-start;
+  margin-top: 1rem;
+
+  &[data-align='center'] {
+    justify-content: center;
+  }
+}
+
+.arrowSlot {
+  display: flex;
+}
+
+.arrow {
+  display: inline-flex;
+  border-radius: 50%;
+
+  &:focus-visible {
+    outline: 2px solid t.$purple-light;
+    outline-offset: 4px;
+  }
+}
+
+.arrowCircle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  color: t.$purple;
+  background-color: t.$arrow-circle;
+}
+
+.arrowIcon {
+  width: 40px;
+  height: 40px;
+}
+
+@media (max-width: t.$bp-medium) {
+  .card {
+    --card-pad: 1.5rem;
+  }
+
+  .icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  // 44px keeps the arrow easy to tap.
+  .arrowCircle {
+    width: 44px;
+    height: 44px;
+  }
+
+  .arrowIcon {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+@media (max-width: t.$bp-small), (max-height: t.$short-screen) {
+  .card {
+    --card-pad: 1.25rem;
+  }
+
+  .header {
+    gap: 0.75rem;
+  }
+
+  .icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .divider {
+    margin: 0.5rem 0 0.75rem;
+  }
+
+  .arrowRow {
+    margin-top: 0.75rem;
+  }
+}
