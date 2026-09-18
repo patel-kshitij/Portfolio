@@ -8,6 +8,19 @@ const ShootingStar: React.FC = () => {
     const [shootingStars, setShootingStars] = useState<React.ReactElement[]>([]);
 
     useEffect(() => {
+        // Every timer this effect starts, so all of them can be stopped again.
+        // Development mode mounts a component twice; without this the first loop
+        // keeps running forever alongside the second one.
+        const timers = new Set<ReturnType<typeof setTimeout>>();
+
+        const later = (run: () => void, delayMs: number) => {
+            const timer = setTimeout(() => {
+                timers.delete(timer);
+                run();
+            }, delayMs);
+            timers.add(timer);
+        };
+
         const createShootingStar = () => {
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
@@ -26,7 +39,6 @@ const ShootingStar: React.FC = () => {
                         top: `${startTop}px`,
                         left: `${startLeft}px`,
                         animationDuration: `${shootingStarConfig.speed}s`,
-                        // transform: `rotate(${angle}deg)`,
                     }}
                 >
                     <div className={styles.shootingStar}/>
@@ -34,18 +46,16 @@ const ShootingStar: React.FC = () => {
                         className={styles.shootingStarTail}
                         style={{
                             width: `${shootingStarConfig.trailLength}px`,
-                            transform: `rotate(${180+angle}deg)`,
+                            transform: `rotate(${180 + angle}deg)`,
                         }}
                     />
-
-
                 </div>
             );
 
             setShootingStars((prev) => [...prev, shootingStarElement]);
 
             // Remove shooting star after animation ends
-            setTimeout(() => {
+            later(() => {
                 setShootingStars((prev) => prev.slice(1));
             }, shootingStarConfig.speed * 1000);
         };
@@ -55,10 +65,18 @@ const ShootingStar: React.FC = () => {
             const nextStarDelay =
                 shootingStarConfig.frequencySeconds * 1000 +
                 Math.random() * shootingStarConfig.frequencyRandomness * 1000;
-            setTimeout(generateShootingStar, nextStarDelay);
+            later(generateShootingStar, nextStarDelay);
         };
 
         generateShootingStar();
+
+        return () => {
+            for (const timer of timers) clearTimeout(timer);
+            timers.clear();
+            // Stars already on screen would otherwise stay forever: their own
+            // removal timer has just been cleared.
+            setShootingStars([]);
+        };
     }, []);
 
     return <div className={styles.shootingStarContainerWrapper}>{shootingStars}</div>;
