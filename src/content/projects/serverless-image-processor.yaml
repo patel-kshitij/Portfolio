@@ -29,7 +29,7 @@ architecture:
     - { from: lambdas, to: s3, step: 5 }
     - { from: sfn, to: sns, step: 6 }
 case_study:
-  published: false
+  published: true
   intro: A serverless service on AWS that resizes, blurs and crops images when an app asks. It shows how to build an image pipeline that grows with demand and only uses computing power while it works.
   role: Sole engineer, university cloud computing course project
   built: January to April 2024
