@@ -1,0 +1,18 @@
+# The Projects page: its filter groups and the order of the projects.
+# How to edit the project files in this folder: docs/guides/case-studies.md
+
+# The filter buttons, in the order they are shown. A project's `group` must be one of these ids.
+groups:
+  - { id: product, label: Products }
+  - { id: backend, label: Backend & cloud }
+  - { id: data, label: Data }
+
+# The order the projects appear in. The first one is the headline tile when someone arrives.
+# Every other file in this folder must be listed here, once, by its file name without .yaml.
+order:
+  - qrakr
+  - work-board
+  - serverless-image-pipeline
+  - skillswap
+  - ecomart-backend
+  - player-performance-prediction

@@ -1,0 +1,22 @@
+# Ecomart Backend. How to edit this file: docs/guides/case-studies.md
+slug: ecomart-backend
+title: Ecomart Backend
+summary: 'REST APIs for a second-hand marketplace: listings, users and orders.'
+group: backend
+tags: [Python, Django, REST]
+live:
+code: https://github.com/patel-kshitij/Ecomart-be
+facts: []
+architecture:
+  # Drafted from the project's sentence and tools; check against the real code (STATUS entry 28).
+  boxes:
+    - { id: client, label: Client, col: 0, row: top }
+    - { id: api, label: Django REST, col: 1, row: top }
+    - { id: listings, label: Listings, col: 2, row: top }
+    - { id: users, label: Users, col: 2, row: bottom }
+    - { id: orders, label: Orders, col: 3, row: top }
+  arrows:
+    - { from: client, to: api }
+    - { from: api, to: listings }
+    - { from: api, to: users }
+    - { from: listings, to: orders }

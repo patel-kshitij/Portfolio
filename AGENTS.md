@@ -10,7 +10,7 @@ Everything else is mapped in [docs/INDEX.md](docs/INDEX.md).
 2. **Agents install nothing on the owner's computer.** Build and test in your own workspace. The owner runs `npm install` and `npm run test:e2e:install`, so the lockfile is always produced on the owner's machine.
 3. **Architecture before code.** A new feature or a structural change starts with options, their pros and cons, and a decision recorded in [docs/DECISIONS.md](docs/DECISIONS.md).
 4. **Docs change together with the behaviour they describe,** in the same change. See [docs/rules/documentation.md](docs/rules/documentation.md).
-5. **All checks pass before handover:** `npm run typecheck`, `npm run lint`, `npm run build`, `npm run test:e2e` and `npm run docs:check`.
+5. **All checks pass before handover:** `npm run content:check`, `npm run typecheck`, `npm run lint`, `npm run build`, `npm run test:e2e` and `npm run docs:check`.
 6. **No file or folder in this repository is named after an AI vendor.** This file is the only entry point for agents.
 
 ## Routing table
@@ -20,6 +20,7 @@ Everything else is mapped in [docs/INDEX.md](docs/INDEX.md).
 | `src/**` (pages, stage, sections, styles, content) | [docs/rules/frontend.md](docs/rules/frontend.md) |
 | `e2e/**` or `playwright.config.ts` | [docs/rules/frontend.md](docs/rules/frontend.md), section "Testing" |
 | `docs/**`, `AGENTS.md`, `README.md` or `scripts/docs-check.mjs` | [docs/rules/documentation.md](docs/rules/documentation.md) |
+| `src/content/projects/**` or `scripts/content-build.mjs` | [docs/guides/case-studies.md](docs/guides/case-studies.md), then [docs/rules/frontend.md](docs/rules/frontend.md) rules 4 and 4a |
 
 Rule files do not load by themselves. Open the one for your area before you change anything there.
 

@@ -25,3 +25,4 @@ Find your question, then open the file listed with it.
 ## Guides
 
 - How do I run, check and test the site, or add a new section? [guides/development.md](guides/development.md)
+- How do I edit a project, publish a case study, or get the case study words from another chat? [guides/case-studies.md](guides/case-studies.md)

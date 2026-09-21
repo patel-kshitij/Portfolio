@@ -1,0 +1,18 @@
+# Player Performance Prediction. How to edit this file: docs/guides/case-studies.md
+slug: player-performance-prediction
+title: Player Performance Prediction
+summary: Predicting how FIFA players will perform in their next matches from past match data.
+group: data
+tags: [Python, Data science]
+live:
+code: # The owner is adding the code link (STATUS entry 23).
+facts: []
+architecture:
+  # Drafted from the project's sentence and tools; check against the real code (STATUS entry 28).
+  boxes:
+    - { id: data, label: Match data, col: 0, row: top }
+    - { id: model, label: Model, col: 1, row: top }
+    - { id: prediction, label: Prediction, col: 2, row: top }
+  arrows:
+    - { from: data, to: model }
+    - { from: model, to: prediction }

@@ -1,0 +1,20 @@
+# SkillSwap. How to edit this file: docs/guides/case-studies.md
+slug: skillswap
+title: SkillSwap
+summary: A neighbourhood app for offering and asking for skills.
+group: backend
+tags: [Java, Spring, Next.js]
+live:
+code: https://github.com/patel-kshitij/Skillswap
+facts: []
+architecture:
+  # Drafted from the project's sentence and tools; check against the real code (STATUS entry 28).
+  boxes:
+    - { id: web, label: Next.js, col: 0, row: top }
+    - { id: api, label: Spring API, col: 1, row: top }
+    - { id: offers, label: Offers, col: 2, row: top }
+    - { id: requests, label: Requests, col: 2, row: bottom }
+  arrows:
+    - { from: web, to: api }
+    - { from: api, to: offers }
+    - { from: api, to: requests }
