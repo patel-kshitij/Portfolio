@@ -299,3 +299,11 @@ Append-only. Never edit or delete an entry; add a new one that names the entry i
 
 **Costs accepted:** One more dependency and one more script. Types are no longer checked by TypeScript at the source; the script's checks replace them. The group ids are now plain strings from `index.yaml`.
 
+## 23. On a case study the arrow turns around and leads back to the tiles (2026-09-21)
+
+**Replaces:** entry 21's detail that on a case study the arrow still leads to Contact, and the "All projects" link at the top of a case study.
+
+**Decision:** On a case study the round arrow points back and leads to `/projects`, with the same turn animation as on the last section. It stays at the left of the card; it does not glide to the middle, because that belongs to the last section. The "All projects" link above the intro is removed. The Right key and a swipe to the left follow the arrow, so on a case study they go back to the tiles as well, like the Left key.
+
+**Why:** The owner asked for one clear way back, in the place visitors already use to move, instead of a second link at the top.
+

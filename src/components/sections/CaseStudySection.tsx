@@ -1,9 +1,8 @@
 'use client'
 
-import Link from 'next/link'
 import ArchitectureDiagram from '@/components/ArchitectureDiagram'
 import { projectLink, projectStatus } from '@/content/projects'
-import { getSection, type CaseStudyProject } from '@/content/sections'
+import type { CaseStudyProject } from '@/content/sections'
 import styles from '@/styles/CaseStudy.module.scss'
 
 const STATUS_LABEL = { live: 'Live', code: 'Code public', soon: 'In progress' } as const
@@ -11,18 +10,14 @@ const STATUS_LABEL = { live: 'Live', code: 'Code public', soon: 'In progress' } 
 /**
  * One project's case study, shown in the card at /projects/<slug> (decision 21).
  * The card's title already shows the project's name, so this starts with the intro.
+ * There is no back link here: the card's arrow turns around and leads back to the tiles (decision 23).
  */
 export default function CaseStudySection({ project }: { project: CaseStudyProject }) {
   const study = project.caseStudy
   const link = projectLink(project)
-  const projectsPath = getSection('projects').path
 
   return (
     <article className={styles.caseStudy}>
-      <Link href={projectsPath} scroll={false} className={styles.back}>
-        All projects
-      </Link>
-
       <p className={styles.intro}>{study.intro}</p>
 
       <dl className={styles.meta}>

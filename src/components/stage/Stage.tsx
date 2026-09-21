@@ -68,8 +68,10 @@ export default function Stage({ children }: { children: ReactNode }) {
 
   const Content = sectionContent[section.id]
   // The link target follows the address at once; the arrow's place follows the content on screen,
-  // so it moves together with the card instead of jumping at the click.
-  const pointsBack = isLastSection(section.id)
+  // so it moves together with the card instead of jumping at the click. On a case study the
+  // arrow turns around and leads back to its section's tiles (decision 23).
+  const pointsBack = isLastSection(section.id) || Boolean(view.project)
+  const next = view.project ? section : getNextSection(section)
   const centered = isLastSection(shownId)
 
   // Elements that only animate in during the intro. Everywhere else they render already visible.
@@ -132,7 +134,7 @@ export default function Stage({ children }: { children: ReactNode }) {
               </AnimatePresence>
 
               <NextLink
-                next={getNextSection(section)}
+                next={next}
                 pointsBack={pointsBack}
                 centered={centered}
                 playIntro={playIntro}
