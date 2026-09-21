@@ -307,3 +307,11 @@ Append-only. Never edit or delete an entry; add a new one that names the entry i
 
 **Why:** The owner asked for one clear way back, in the place visitors already use to move, instead of a second link at the top.
 
+## 24. Project material from other chats arrives as a marked handoff (2026-09-21)
+
+**Context:** The owner gathers case study material in other chats and pastes the answer into a Portfolio chat that may know nothing about the work. The first answer arrived as a bare file with no checklist, and its drawing had two arrows running through boxes.
+
+**Decision:** The prompt in [guides/case-studies.md](guides/case-studies.md) asks for one code block between `=== PORTFOLIO HANDOFF v1 ===` and `=== END PORTFOLIO HANDOFF ===`, which says what it is, which file it belongs in, carries the project file and the "check before publishing" list, and points the receiver to the guide's "Receiving a handoff" steps. `AGENTS.md` names the marker, so any new chat in this repository knows what to do with it. The prompt now also gives the drawing rules, and `scripts/content-build.mjs` refuses arrows that would be drawn through a box. The `v1` changes only if the block's shape changes.
+
+**Why:** A block that describes itself needs no explanation from the owner, and the check catches the layout mistake instead of a person spotting it.
+
