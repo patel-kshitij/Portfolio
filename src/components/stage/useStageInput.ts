@@ -11,8 +11,9 @@ import { getNextSection, getPreviousSection, type StageView } from '@/content/se
  */
 const SWIPE_MIN_PX = 50
 
-/** Where Right, or a swipe to the left, leads: the next section, as the arrow does. */
+/** Where Right, or a swipe to the left, leads: wherever the arrow leads. On a case study that is back to the tiles. */
 function nextPath(view: StageView): string {
+  if (view.project) return view.section.path
   return getNextSection(view.section).path
 }
 
@@ -32,8 +33,8 @@ export const INPUT_HINT = 'Use the Left and Right arrow keys, or swipe, to move 
  * - Left arrow key, or a swipe to the right, goes to the previous section. On Home it does nothing.
  * Up and Down are left alone, because they scroll a tall section inside the card.
  *
- * On a case study (decision 21) the next section is still Contact, and going back means
- * going up to the Projects tiles.
+ * On a case study both lead back to the Projects tiles, because the arrow points back there
+ * (decisions 21 and 23).
  *
  * These are not clicks, so they move with the router instead of a link
  * (docs/rules/frontend.md, rule 6). With no view (a wrong address) nothing is wired up.

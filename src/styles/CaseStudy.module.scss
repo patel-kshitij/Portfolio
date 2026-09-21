@@ -10,27 +10,11 @@
   max-width: 900px;
 }
 
-.back {
-  align-self: flex-start;
-  font-size: t.$text-min;
-  color: t.$purple-light;
-  border-radius: 2px;
-
-  &::before {
-    content: '\2190\00a0';
-  }
-
-  &:hover {
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-}
-
 .intro {
   @include t.body-text;
 
   max-width: 60ch;
-  margin: 1rem 0;
+  margin: 0 0 1rem;
 }
 
 .meta {

@@ -309,10 +309,13 @@ test.describe('case studies', () => {
       await expect(page.locator('[data-view]')).toHaveAttribute('data-view', 'projects')
       await expectSameDocument(page)
 
+      // The arrow turns around on a case study and leads back to the tiles.
       await page.goBack()
       await expect(page).toHaveURL(path)
-      await page.getByRole('link', { name: 'All projects' }).click()
+      await expect(page.locator('[data-turned]')).toHaveAttribute('data-turned', 'back')
+      await page.getByRole('link', { name: 'Back to Projects' }).click()
       await expect(page).toHaveURL('/projects')
+      await expect(page.locator('[data-turned]')).toHaveAttribute('data-turned', 'forward')
       await expectSameDocument(page)
     })
 
