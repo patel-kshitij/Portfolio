@@ -15,9 +15,13 @@ Nothing right now.
 
 ## Waiting on the owner
 
+27. **Review the projects rebuild** ([DECISIONS.md](DECISIONS.md) entry 21). Built and checked in the agent's workspace: tiles with group filters and a headline, architecture drawings, case study pages inside the card at `/projects/<slug>`, the card resizing through `LayoutGroup`, new e2e tests, and the docs. `npm run typecheck`, `npm run lint`, `npm run build`, `npm run test:e2e` and `npm run docs:check` pass there (the build used a stand-in for the Google font, which that workspace cannot download). The case study page and its tests were checked with a temporary case study that was removed before handover. The owner runs every check on macOS, looks at `/projects` on a real screen and a phone, reviews and commits.
+
+28. **Write the project words** ([DECISIONS.md](DECISIONS.md) entry 21). Three parts, in any order: (a) check every architecture drawing in `src/content/projects.ts`; the agent drafted them from each project's sentence and tools, so fix any box or arrow that is wrong; (b) write up to three `facts` per project, starting with Qrakr, the headline; (c) write case studies, suggested first: Qrakr, Serverless Image Pipeline, Work Board. Each case study becomes live the moment its `caseStudy` is filled in.
+
 26. **Node.js 24 before 2026-10-01** ([DECISIONS.md](DECISIONS.md) entry 20). `engines` and `@types/node` changed in `package.json`, the development guide updated. The owner updates Node on his computer to 24, runs `npm install` so the lockfile changes on his machine, runs every check, reviews and commits. The first deployment after that should log Node 24 in the Vercel build output. Optionally set the dashboard's Node.js Version to 24.x as well.
 
-23. **Player Performance Prediction has no code link.** The owner said he will add it. Fill in `code` on that entry in `src/content/projects.ts`; the panel then shows a "Code on GitHub" link for it.
+23. **Player Performance Prediction has no code link.** The owner said he will add it. Fill in `code` on that entry in `src/content/projects.ts`; its status then changes from Soon to Code and its headline shows a "Code on GitHub" link.
 
 24. **The resume on the site is a temporary one.** When the final resume is ready, export a copy without the phone number and replace `public/resume.pdf`. Nothing else changes.
 

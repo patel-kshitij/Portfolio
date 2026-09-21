@@ -254,3 +254,28 @@ Append-only. Never edit or delete an entry; add a new one that names the entry i
 **Why:** A version written in the repository is visible in review and cannot drift in a dashboard. 24 is Vercel's default and has the longest support left (about April 2028); 22 ends about April 2027 and would mean doing this again within a year. Next.js 16 needs Node 20.9 or newer, so 24 is inside its range.
 
 **Consequences:** The owner's computer runs Node 22; npm warns about the engine until it is updated to 24, and the site still builds. `npm install` must be run once so `package-lock.json` records the new `engines` and `@types/node`. The dashboard setting no longer matters but can be set to 24.x too, so it does not mislead.
+
+## 21. Projects are tiles with a headline, groups, architecture drawings and case studies (2026-09-21)
+
+**Replaces:** entry 19 (the constellation). Entry 18's rule that every project has one `summary` sentence, `tags`, and optional `live` and `code` still holds.
+
+**Context:** The owner was not satisfied with the constellation. His reasons: the section said nothing about the work, the star map was decoration pretending to be navigation, it was hard to scan with one project visible at a time, it still looked like every other portfolio, and it had no room or grouping for more projects. Four directions were mocked inside the real card: a grouped list (the "manifest"), one headline project with the rest below, case study pages, and the architecture of each project instead of a screenshot. He chose the groups, the headline and the architecture, laid out as tiles, with case studies behind them.
+
+**Options on the two structural questions, and his choices:**
+
+- *Where a case study lives:* inside the card, at its own address such as `/projects/qrakr`, with the same transition as a section change; or as a separate plain page outside the card. **Inside the card.** It keeps the one rule that the card holds everything, and Back returns to the tiles with the same animation.
+- *What goes live before the words are written:* only projects whose case study has been written get the "Case study" label and a page; or the agent drafts the case studies and the owner corrects them; or placeholders shown as "coming soon". **Only written case studies go live.** Nothing invented ever reaches the site.
+
+**Decision:**
+
+- `src/content/projects.ts` gives every project a `slug`, a `group` (Products, Backend and cloud, Data), its `architecture` (boxes on a small grid and the arrows between them), and optionally `facts` (up to three short lines) and a `caseStudy`. A project's status (Live, Code, Soon) is worked out from `live` and `code`, never written by hand.
+- `src/components/sections/ProjectsSection.tsx` shows filter buttons for the groups, one headline tile, and a small tile for every other project. The headline shows the full architecture drawing, the facts when there are any, the tools, the link, and "Read the case study" when one exists. Each small tile shows a tiny version of its own drawing, dots and lines without labels. Clicking a small tile makes it the headline. The first project in the list is the headline on arrival.
+- A case study is a stage view, not a new section. `getViewByPath()` in `src/content/sections.ts` turns `/projects/<slug>` into the Projects section plus that project, and `Stage` keys its content, its title words and its `shownKey` by the view. The arrow still leads to Contact; the Left key and a swipe to the right go back to `/projects`. `src/app/projects/[slug]/page.tsx` exports metadata and returns `null`, like every page file, and prerenders only projects that have a case study; any other slug answers 404 and the stage sends the visitor home.
+- `src/components/ArchitectureDiagram.tsx` draws every architecture as SVG from the same data, in two sizes. On a case study the arrows carry step numbers that match a numbered list under the drawing.
+- The card animates when the Projects section changes height (a filter, or a new headline). `Stage` wraps the card in Motion's `LayoutGroup`, so a layout change inside the section makes the card measure again, the same way a section change does.
+
+**Why:** The tiles fix scanning and room to grow; the headline fixes the sense of what matters most; the architecture is the one picture of backend work that says something and that no generic portfolio has; the case studies carry the proof. Putting case studies inside the card reuses the stage instead of building a second kind of page.
+
+**Costs accepted:** Every project needs an architecture, even small ones. The stage now knows about one kind of address below a section. Until a case study is written the case study page, its route and its e2e tests exist but are not reachable on the live site; the e2e tests for it skip themselves while no project has one. The headline tile looks thin until facts are written.
+
+**Consequences:** `src/styles/Constellation.module.scss` is deleted; `src/styles/Projects.module.scss`, `src/styles/CaseStudy.module.scss` and `src/styles/Architecture.module.scss` are new. The `star` field and `constellationLines` are gone. Entry 19's rule that selecting a project never changes the card's size is replaced by the `LayoutGroup` rule above. The architecture drawings shipped with this change were drafted by the agent from each project's existing sentence and tools and must be checked by the owner before they go live.

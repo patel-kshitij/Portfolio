@@ -1,133 +1,149 @@
 'use client'
 
-import { useReducedMotion } from 'motion/react'
+import { AnimatePresence } from 'motion/react'
 import * as m from 'motion/react-m'
-import { useState } from 'react'
-import { constellationLines, projects, type Project } from '@/content/projects'
-import { constellation } from '@/components/stage/timing'
-import styles from '@/styles/Constellation.module.scss'
+import Link from 'next/link'
+import { useEffect, useRef, useState } from 'react'
+import ArchitectureDiagram from '@/components/ArchitectureDiagram'
+import { projects, projectGroups, projectLink, projectStatus, type Project, type ProjectGroup } from '@/content/projects'
+import { caseStudyPath } from '@/content/sections'
+import { projectsView } from '@/components/stage/timing'
+import styles from '@/styles/Projects.module.scss'
 
-/** The sky panel's drawing space. Positions in projects.ts are in these units. */
-const SKY = { width: 100, height: 60 }
+const STATUS_LABEL = { live: 'Live', code: 'Code', soon: 'Soon' } as const
 
-/** Faint background dots, fixed so the server and the browser draw the same sky. */
-const dust = (() => {
-  let seed = 20260918
-  const next = () => {
-    seed = (seed * 1103515245 + 12345) % 2147483648
-    return seed / 2147483648
-  }
-  return Array.from({ length: 70 }, () => ({
-    x: next() * SKY.width,
-    y: next() * SKY.height,
-    r: 0.15 + next() * 0.25,
-    o: 0.25 + next() * 0.5,
-  }))
-})()
+type Filter = 'all' | ProjectGroup
 
-const byTitle = new Map(projects.map((project) => [project.title, project]))
-
-/** Where a star's link leads and what to call it. */
-function destination(project: Project) {
-  if (project.live) return { href: project.live, label: 'Live site' }
-  if (project.code) return { href: project.code, label: 'Code on GitHub' }
-  return undefined
+function StatusLabel({ project }: { project: Project }) {
+  const status = projectStatus(project)
+  return (
+    <span className={styles.status} data-status={status}>
+      {STATUS_LABEL[status]}
+    </span>
+  )
 }
 
 /**
- * Projects as a constellation (decision 19): a window onto the sky inside the card, one
- * star per project, faint lines between them, and a panel for the selected project.
- * Every project's details are in the HTML; only the selected one is shown, and a
- * <noscript> style shows them all when JavaScript is off.
+ * Projects as tiles (decision 21): filter buttons for the groups, one headline tile with the
+ * full architecture drawing, and a small tile for every other project. Clicking a small tile
+ * makes it the headline. The headline links to the project's case study when one is written.
+ * Changes in height reach the card through the LayoutGroup in Stage, so the card animates.
  */
 export default function ProjectsSection() {
-  const [selected, setSelected] = useState(0)
-  const reduceMotion = useReducedMotion()
+  const [filter, setFilter] = useState<Filter>('all')
+  const [headlineSlug, setHeadlineSlug] = useState(projects[0].slug)
+  // Set when a visitor picks a tile, so focus can follow the project into the headline.
+  const focusHeadline = useRef(false)
+  const headlineTitle = useRef<HTMLHeadingElement>(null)
+
+  const visible = projects.filter((project) => filter === 'all' || project.group === filter)
+  const headline = visible.find((project) => project.slug === headlineSlug) ?? visible[0]
+  const others = visible.filter((project) => project !== headline)
+
+  // The tile a visitor clicked disappears into the headline, so focus would fall to the page.
+  useEffect(() => {
+    if (!focusHeadline.current) return
+    focusHeadline.current = false
+    headlineTitle.current?.focus()
+  }, [headlineSlug])
+
+  const link = headline ? projectLink(headline) : undefined
 
   return (
-    <div className={styles.constellation}>
-      <noscript>
-        <style>{`.${styles.details}{display:block}.${styles.detail}{visibility:visible!important}`}</style>
-      </noscript>
-
-      <div className={styles.sky} aria-label="The projects, drawn as a constellation" role="group">
-        <svg
-          className={styles.lines}
-          viewBox={`0 0 ${SKY.width} ${SKY.height}`}
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          {dust.map((dot, index) => (
-            <circle key={index} cx={dot.x} cy={dot.y} r={dot.r} className={styles.dust} opacity={dot.o} />
-          ))}
-          {constellationLines.map(([fromTitle, toTitle]) => {
-            const from = byTitle.get(fromTitle)?.star
-            const to = byTitle.get(toTitle)?.star
-            if (!from || !to) return null
-            return (
-              <m.line
-                key={`${fromTitle}-${toTitle}`}
-                x1={from.x}
-                y1={from.y}
-                x2={to.x}
-                y2={to.y}
-                className={styles.line}
-                initial={reduceMotion ? false : { pathLength: 0 }}
-                animate={{ pathLength: 1, transition: constellation.draw }}
-              />
-            )
-          })}
-        </svg>
-
-        {projects.map((project, index) => (
+    <div className={styles.projects}>
+      <div className={styles.filters} role="group" aria-label="Show projects by group">
+        {[{ id: 'all' as const, label: 'All' }, ...projectGroups].map((group) => (
           <button
-            key={project.title}
+            key={group.id}
             type="button"
-            className={styles.star}
-            style={{ left: `${(project.star.x / SKY.width) * 100}%`, top: `${(project.star.y / SKY.height) * 100}%` }}
-            data-size={project.star.size}
-            data-label={project.star.labelSide}
-            aria-pressed={index === selected}
-            aria-label={`${project.title}, project ${index + 1} of ${projects.length}`}
-            onClick={() => setSelected(index)}
-            onFocus={() => setSelected(index)}
-            onMouseEnter={() => setSelected(index)}
+            className={styles.filter}
+            aria-pressed={filter === group.id}
+            onClick={() => setFilter(group.id)}
           >
-            <span className={styles.point} aria-hidden="true" />
-            <span className={styles.label} aria-hidden="true">
-              {project.title}
-            </span>
+            {group.label}
           </button>
         ))}
       </div>
 
-      <div className={styles.details}>
-        {projects.map((project, index) => {
-          const to = destination(project)
-          return (
-            <m.article
-              key={project.title}
-              className={styles.detail}
-              data-selected={index === selected}
-              initial={false}
-              animate={{ opacity: index === selected ? 1 : 0, transition: constellation.swap }}
-            >
-              <h2 className={styles.detailTitle}>{project.title}</h2>
-              <p className={styles.detailSummary}>{project.summary}</p>
-              <ul className={styles.detailTags} aria-label={`Built with, ${project.title}`}>
-                {project.tags.map((tag) => (
-                  <li key={tag}>{tag}</li>
+      <m.div layout className={styles.grid}>
+        {headline && (
+          <m.article
+            key={headline.slug}
+            layout
+            className={styles.headline}
+            data-project={headline.slug}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: projectsView.swap }}
+          >
+            <div className={styles.headlineTop}>
+              <h2 ref={headlineTitle} tabIndex={-1} className={styles.headlineTitle}>
+                {headline.title}
+              </h2>
+              <StatusLabel project={headline} />
+            </div>
+            <p className={styles.summary}>{headline.summary}</p>
+
+            <div className={styles.drawing}>
+              <ArchitectureDiagram architecture={headline.architecture} size="full" title={headline.title} />
+            </div>
+
+            {headline.facts && headline.facts.length > 0 && (
+              <ul className={styles.facts}>
+                {headline.facts.map((fact) => (
+                  <li key={fact}>{fact}</li>
                 ))}
               </ul>
-              {to && (
-                <a href={to.href} target="_blank" rel="noopener noreferrer" className={styles.detailLink}>
-                  {to.label}
+            )}
+
+            <div className={styles.headlineFoot}>
+              {headline.caseStudy && (
+                <Link href={caseStudyPath(headline)} scroll={false} className={styles.caseStudyLink}>
+                  Read the case study
+                </Link>
+              )}
+              {link && (
+                <a href={link.href} target="_blank" rel="noopener noreferrer" className={styles.externalLink}>
+                  {link.label}
                 </a>
               )}
-            </m.article>
-          )
-        })}
-      </div>
+              <span className={styles.tags}>{headline.tags.join(' · ')}</span>
+            </div>
+          </m.article>
+        )}
+
+        <AnimatePresence initial={false} mode="popLayout">
+          {others.map((project) => (
+            <m.button
+              key={project.slug}
+              layout
+              type="button"
+              className={styles.tile}
+              data-project={project.slug}
+              aria-label={`Show ${project.title}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: projectsView.swap }}
+              exit={{ opacity: 0, transition: projectsView.swap }}
+              onClick={() => {
+                focusHeadline.current = true
+                setHeadlineSlug(project.slug)
+              }}
+            >
+              <span className={styles.tileDrawing}>
+                <ArchitectureDiagram architecture={project.architecture} size="mini" title={project.title} />
+              </span>
+              <span className={styles.tileTop}>
+                <span className={styles.tileTitle}>{project.title}</span>
+                <StatusLabel project={project} />
+              </span>
+              <span className={styles.tileSummary}>{project.summary}</span>
+              <span className={styles.tileFoot}>
+                <span className={styles.tags}>{project.tags.join(' · ')}</span>
+                {project.caseStudy && <span className={styles.caseStudyMark}>Case study</span>}
+              </span>
+            </m.button>
+          ))}
+        </AnimatePresence>
+      </m.div>
     </div>
   )
 }

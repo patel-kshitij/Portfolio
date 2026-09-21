@@ -46,10 +46,11 @@ If `npm run test:e2e` fails, the trace of the failed test is saved in `test-resu
 
 ## Add or change a project
 
-1. Edit `src/content/projects.ts`. Every entry needs `title`, a one sentence `summary`, `tags` and a `star`: an `x` from 0 to 100, a `y` from 0 to 60, a `size` (3 for the main work, 1 for the smallest) and a `labelSide`. Add `live` and `code` when they exist. TypeScript refuses an entry that is missing a required field.
-   Then join the new star to at least one other in `constellationLines`, and open `/projects` at 375px wide to check that its label does not run off the panel or over another label; move it or flip `labelSide` if it does.
+1. Edit `src/content/projects.ts`. Every entry needs a `slug` (lowercase, dashes), `title`, a one sentence `summary`, a `group`, `tags` and an `architecture`: boxes with an `id`, a short `label`, a `col` from 0 to 4 and a `row` of 0 or 1, and the arrows between them by `id`. Add `live` and `code` when they exist. TypeScript refuses an entry that is missing a required field. The first entry is the headline on arrival.
+   Open `/projects` and check the drawing reads well; on a phone it scrolls sideways inside its frame, which is expected.
+   To add facts, write up to three short lines in `facts`. To add a case study, fill in `caseStudy` completely and give the arrows a `step` number that matches each line of `steps`. The page at `/projects/<slug>`, the "Read the case study" button, the tile's label and the sitemap entry all appear on their own.
 2. If the Projects page description in `src/content/sections.ts` names projects, keep it true, and set that section's `lastModified` to today.
-3. Run `npm run test:e2e`; the constellation test checks that every star selects and the card keeps its size.
+3. Run `npm run test:e2e`; the tiles test checks the headline, a tile swap and the filters, and the case study tests run once for each written case study.
 
 ## Replace the resume
 

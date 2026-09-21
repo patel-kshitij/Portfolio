@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { getCaseStudyProject, type CaseStudy, type Project } from '@/content/projects'
 import { site } from '@/lib/site'
 
 /**
@@ -59,7 +60,7 @@ export const sections: readonly Section[] = [
     description:
       'Projects by Kshitij Patel: Qrakr, an AI work board for ADHD users, a serverless image pipeline on AWS, and more.',
     sitemapPriority: 0.8,
-    lastModified: '2026-09-18',
+    lastModified: '2026-09-21',
   },
   {
     id: 'contact',
@@ -79,6 +80,56 @@ export function getSectionByPath(pathname: string | null | undefined): Section |
   if (!pathname) return undefined
   const path = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname
   return sections.find((section) => section.path === path)
+}
+
+/** A project that has a case study to show. */
+export type CaseStudyProject = Project & { caseStudy: CaseStudy }
+
+/**
+ * What the stage shows for an address (decision 21): a section, or a case study, which is
+ * the Projects section plus one project. `key` tells the stage when the content changes;
+ * for a plain section it is the section's id.
+ */
+export interface StageView {
+  key: string
+  section: Section
+  titleWords: readonly string[]
+  project?: CaseStudyProject
+}
+
+/** The address of a project's case study page, below the Projects section's address. */
+export function caseStudyPath(project: Project): string {
+  return `${getSection('projects').path}/${project.slug}`
+}
+
+/** One object per view, so the stage's effects see the same view until the address really changes. */
+const views = new Map<string, StageView>()
+
+function remember(view: StageView): StageView {
+  const known = views.get(view.key)
+  if (known) return known
+  views.set(view.key, view)
+  return view
+}
+
+/** The view for an address, or undefined when the address is neither a section nor a written case study. */
+export function getViewByPath(pathname: string | null | undefined): StageView | undefined {
+  const section = getSectionByPath(pathname)
+  if (section) return remember({ key: section.id, section, titleWords: section.titleWords })
+  if (!pathname) return undefined
+
+  const projectsSection = getSection('projects')
+  const path = pathname.replace(/\/+$/, '')
+  const prefix = `${projectsSection.path}/`
+  if (!path.startsWith(prefix)) return undefined
+  const project = getCaseStudyProject(path.slice(prefix.length))
+  if (!project) return undefined
+  return remember({
+    key: `${projectsSection.id}/${project.slug}`,
+    section: projectsSection,
+    titleWords: project.title.split(' '),
+    project,
+  })
 }
 
 export function getSection(id: SectionId): Section {
@@ -122,6 +173,33 @@ export function sectionMetadata(id: SectionId): Metadata {
       siteName: site.name,
       locale: site.locale,
       url: section.path,
+      title,
+      description,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
+  }
+}
+
+/** Metadata for a case study's page file, shaped like a section's (decision 21). */
+export function caseStudyMetadata(project: CaseStudyProject): Metadata {
+  const path = caseStudyPath(project)
+  const pageTitle = `${project.title} case study`
+  const title = `${pageTitle} | ${site.name}`
+  const description = project.caseStudy.intro
+
+  return {
+    title: pageTitle,
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      type: 'article',
+      siteName: site.name,
+      locale: site.locale,
+      url: path,
       title,
       description,
     },

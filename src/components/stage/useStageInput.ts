@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, type PointerEvent as ReactPointerEvent } from 'react'
-import { getNextSection, getPreviousSection, type Section } from '@/content/sections'
+import { getNextSection, getPreviousSection, type StageView } from '@/content/sections'
 
 /**
  * A finger must travel at least this far sideways, and further sideways than up or down,
@@ -10,6 +10,17 @@ import { getNextSection, getPreviousSection, type Section } from '@/content/sect
  * in timing.ts.
  */
 const SWIPE_MIN_PX = 50
+
+/** Where Right, or a swipe to the left, leads: the next section, as the arrow does. */
+function nextPath(view: StageView): string {
+  return getNextSection(view.section).path
+}
+
+/** Where Left, or a swipe to the right, leads. A case study goes up to its section; Home goes nowhere. */
+function previousPath(view: StageView): string | undefined {
+  if (view.project) return view.section.path
+  return getPreviousSection(view.section)?.path
+}
 
 /** What to tell visitors. Shown as the icons' tooltip and read out to screen readers. */
 export const INPUT_HINT = 'Use the Left and Right arrow keys, or swipe, to move between sections.'
@@ -21,15 +32,18 @@ export const INPUT_HINT = 'Use the Left and Right arrow keys, or swipe, to move 
  * - Left arrow key, or a swipe to the right, goes to the previous section. On Home it does nothing.
  * Up and Down are left alone, because they scroll a tall section inside the card.
  *
+ * On a case study (decision 21) the next section is still Contact, and going back means
+ * going up to the Projects tiles.
+ *
  * These are not clicks, so they move with the router instead of a link
- * (docs/rules/frontend.md, rule 6). With no section (a wrong address) nothing is wired up.
+ * (docs/rules/frontend.md, rule 6). With no view (a wrong address) nothing is wired up.
  */
-export function useStageInput(section: Section | undefined) {
+export function useStageInput(view: StageView | undefined) {
   const router = useRouter()
   const touchStart = useRef<{ x: number; y: number } | null>(null)
 
   useEffect(() => {
-    if (!section) return
+    if (!view) return
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
       const target = event.target
@@ -38,17 +52,17 @@ export function useStageInput(section: Section | undefined) {
       }
       if (event.key === 'ArrowRight') {
         event.preventDefault()
-        router.push(getNextSection(section).path, { scroll: false })
+        router.push(nextPath(view), { scroll: false })
       } else if (event.key === 'ArrowLeft') {
-        const previous = getPreviousSection(section)
+        const previous = previousPath(view)
         if (!previous) return
         event.preventDefault()
-        router.push(previous.path, { scroll: false })
+        router.push(previous, { scroll: false })
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [section, router])
+  }, [view, router])
 
   const onPointerDown = (event: ReactPointerEvent) => {
     // Only fingers swipe. A mouse drag selects text and must keep doing so.
@@ -58,12 +72,12 @@ export function useStageInput(section: Section | undefined) {
   const onPointerUp = (event: ReactPointerEvent) => {
     const start = touchStart.current
     touchStart.current = null
-    if (!start || !section || event.pointerType !== 'touch') return
+    if (!start || !view || event.pointerType !== 'touch') return
     const dx = event.clientX - start.x
     const dy = event.clientY - start.y
     if (Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) <= Math.abs(dy)) return
-    const target = dx < 0 ? getNextSection(section) : getPreviousSection(section)
-    if (target) router.push(target.path, { scroll: false })
+    const target = dx < 0 ? nextPath(view) : previousPath(view)
+    if (target) router.push(target, { scroll: false })
   }
 
   const onPointerCancel = () => {

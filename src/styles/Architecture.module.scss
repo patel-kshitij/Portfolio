@@ -1,0 +1,56 @@
+@use 'tokens' as t;
+
+// Architecture drawings (decision 21), drawn by src/components/ArchitectureDiagram.tsx.
+
+.full {
+  display: block;
+  width: 100%;
+  // Below this width the labels get too small to read; the frame around it scrolls sideways instead.
+  min-width: 30rem;
+  height: auto;
+  font-family: inherit;
+}
+
+.mini {
+  display: block;
+  width: 100%;
+  height: 3.5rem;
+}
+
+.box {
+  fill: t.$surface;
+  stroke: t.$purple-light;
+  stroke-opacity: 0.45;
+}
+
+.label {
+  fill: t.$text;
+  font-size: 11.5px;
+}
+
+.edge {
+  stroke: t.$purple-light;
+  stroke-opacity: 0.5;
+  stroke-width: 1.3;
+}
+
+.head {
+  fill: t.$purple-light;
+  fill-opacity: 0.6;
+}
+
+.dot {
+  fill: t.$purple-light;
+}
+
+.badge {
+  fill: t.$badge;
+  stroke: t.$purple-light;
+  stroke-opacity: 0.6;
+}
+
+.badgeText {
+  fill: t.$purple-light;
+  font-size: 10px;
+  font-weight: 700;
+}

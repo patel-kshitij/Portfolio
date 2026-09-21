@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { caseStudyProjects } from '../src/content/projects'
 
 /**
  * The single page stage, as a visitor sees it (docs/product/site.md).
@@ -236,33 +237,91 @@ test('Home says what Kshitij is open to, and Contact links the resume', async ({
   expect(response.headers()['content-type']).toContain('pdf')
 })
 
-test('the projects are stars: each one selects, and the panel shows it', async ({ page }) => {
+test('the projects are tiles: one headline, groups, and a tile becomes the headline', async ({ page }) => {
   await page.goto('/projects')
   await expectSection(page, 'projects')
 
-  const stars = page.getByRole('button', { name: /project \d of \d/ })
-  expect(await stars.count()).toBeGreaterThan(3)
-
-  // The first star is selected on arrival, so the panel is never empty.
-  const first = page.getByRole('button', { name: 'Qrakr, project 1 of 6' })
-  await expect(first).toHaveAttribute('aria-pressed', 'true')
+  // The first project is the headline on arrival, with its drawing and its own link.
   await expect(page.getByRole('heading', { level: 2, name: 'Qrakr' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Live site' })).toHaveAttribute('href', 'https://qrakr.com')
+  await expect(page.getByRole('img', { name: /^How Qrakr is wired/ })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'qrakr.com' })).toHaveAttribute('href', 'https://qrakr.com')
+  const tiles = page.getByRole('button', { name: /^Show / })
+  await expect(tiles).toHaveCount(5)
 
-  // A click selects another star; the panel follows and the card keeps its size.
-  const cardBefore = await page.getByRole('main').boundingBox()
-  await page.getByRole('button', { name: /^Work Board, project/ }).click()
-  await expect(first).toHaveAttribute('aria-pressed', 'false')
-  await expect(page.getByRole('heading', { level: 2, name: 'Work Board' })).toBeVisible()
-  await expect(page.getByRole('heading', { level: 2, name: 'Qrakr' })).toBeHidden()
-  await expect(page.getByRole('link', { name: 'Live site' })).toHaveAttribute('href', /board\.patelkshitij\.com/)
-  const cardAfter = await page.getByRole('main').boundingBox()
-  expect(cardAfter?.height).toBe(cardBefore?.height)
+  // A small tile becomes the headline, focus follows it, and the old headline becomes a tile.
+  await page.getByRole('button', { name: 'Show Work Board' }).click()
+  const workBoard = page.getByRole('heading', { level: 2, name: 'Work Board' })
+  await expect(workBoard).toBeVisible()
+  await expect(workBoard).toBeFocused()
+  await expect(page.getByRole('button', { name: 'Show Qrakr' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'board.patelkshitij.com' })).toHaveAttribute('href', /board\.patelkshitij\.com/)
 
-  // Keyboard: focusing a star selects it too.
-  await page.getByRole('button', { name: /^SkillSwap, project/ }).focus()
-  await expect(page.getByRole('heading', { level: 2, name: 'SkillSwap' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Code on GitHub' })).toHaveAttribute('href', /github\.com/)
+  // A group filter keeps only that group; All brings everything back.
+  const filters = page.getByRole('group', { name: 'Show projects by group' })
+  await filters.getByRole('button', { name: 'Data' }).click()
+  await expect(filters.getByRole('button', { name: 'Data' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('heading', { level: 2, name: 'Player Performance Prediction' })).toBeVisible()
+  await expect(tiles).toHaveCount(0)
+  await filters.getByRole('button', { name: 'All' }).click()
+  await expect(tiles).toHaveCount(5)
+  await expect(workBoard).toBeVisible()
+})
+
+test('a wrong case study address answers 404, then lands on Home', async ({ page }) => {
+  const response = await page.goto('/projects/not-a-project')
+  expect(response?.status()).toBe(404)
+  await expect(page).toHaveURL('/')
+  await expectSection(page, 'home')
+})
+
+// Case studies only exist once they are written (decision 21), so these run for each one there is.
+test.describe('case studies', () => {
+  const studies = caseStudyProjects()
+  test.skip(studies.length === 0, 'No project has a written case study yet.')
+
+  for (const project of studies) {
+    const path = `/projects/${project.slug}`
+
+    test(`${project.title} opens inside the card, and Left goes back to the tiles`, async ({ page }) => {
+      await page.goto('/projects')
+      await expectSection(page, 'projects')
+      await markDocument(page)
+
+      const tile = page.getByRole('button', { name: `Show ${project.title}` })
+      if (await tile.count()) await tile.click()
+      await page.getByRole('link', { name: 'Read the case study' }).click()
+
+      await expect(page).toHaveURL(path)
+      await expect(page.locator('[data-view]')).toHaveAttribute('data-view', `projects/${project.slug}`)
+      await expectSection(page, 'projects')
+      await expect(page.getByRole('heading', { level: 1, name: project.title })).toBeVisible()
+      await expect(page.getByRole('heading', { level: 2, name: 'How it works' })).toBeVisible()
+      await expect(page.getByRole('img', { name: new RegExp(`^How ${project.title} is wired`) })).toBeVisible()
+      await expectSameDocument(page)
+
+      await page.keyboard.press('ArrowLeft')
+      await expect(page).toHaveURL('/projects')
+      await expect(page.locator('[data-view]')).toHaveAttribute('data-view', 'projects')
+      await expectSameDocument(page)
+
+      await page.goBack()
+      await expect(page).toHaveURL(path)
+      await page.getByRole('link', { name: 'All projects' }).click()
+      await expect(page).toHaveURL('/projects')
+      await expectSameDocument(page)
+    })
+
+    test(`${path} arrives as finished HTML with its own title`, async ({ browser }) => {
+      const context = await browser.newContext({ javaScriptEnabled: false })
+      const page = await context.newPage()
+      const response = await page.goto(path)
+      expect(response?.status()).toBe(200)
+      await expect(page).toHaveTitle(`${project.title} case study | Kshitij Patel`)
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', new RegExp(`${path}$`))
+      await expect(page.getByText(project.caseStudy.intro)).toBeVisible()
+      await context.close()
+    })
+  }
 })
 
 test('links that leave the site open in a new tab safely', async ({ page }) => {
