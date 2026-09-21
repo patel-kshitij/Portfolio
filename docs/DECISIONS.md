@@ -279,3 +279,23 @@ Append-only. Never edit or delete an entry; add a new one that names the entry i
 **Costs accepted:** Every project needs an architecture, even small ones. The stage now knows about one kind of address below a section. Until a case study is written the case study page, its route and its e2e tests exist but are not reachable on the live site; the e2e tests for it skip themselves while no project has one. The headline tile looks thin until facts are written.
 
 **Consequences:** `src/styles/Constellation.module.scss` is deleted; `src/styles/Projects.module.scss`, `src/styles/CaseStudy.module.scss` and `src/styles/Architecture.module.scss` are new. The `star` field and `constellationLines` are gone. Entry 19's rule that selecting a project never changes the card's size is replaced by the `LayoutGroup` rule above. The architecture drawings shipped with this change were drafted by the agent from each project's existing sentence and tools and must be checked by the owner before they go live.
+
+## 22. Project words live in one YAML file per project, and case studies publish only when marked (2026-09-21)
+
+**Replaces:** the part of entry 21 that put project content in `src/content/projects.ts`, and entry 21's rule that only a written case study exists. The rest of entry 21 holds.
+
+**Context:** The owner wants to gather the real architecture and case study material in other chats, bring it back in a fixed shape, and edit it himself later without touching code. Entry 21 kept the content as TypeScript, where every change means quotes, commas and brackets in one long file.
+
+**Options:** one YAML file per project, checked by a script; keep everything in `src/content/projects.ts`; one Markdown file per project with the case study as prose under headings. **Chosen: one YAML file per project.**
+
+**Decision:**
+
+- Every project is `src/content/projects/<slug>.yaml`, in the same shape the prompt in [guides/case-studies.md](guides/case-studies.md) asks another chat to produce. `src/content/projects/index.yaml` holds the filter groups and the order.
+- `scripts/content-build.mjs` reads and checks them and writes `src/content/projects.generated.json`, which `src/content/projects.ts` imports. The generated file is not committed. `npm run content:check` only checks; `npm run content:build` runs by itself before `dev`, `build`, `typecheck` and `test:e2e`, so Vercel builds it too. Any problem stops the build with a plain sentence naming the file.
+- A case study reaches the site only when it says `published: true`. Drafts stay in the file, hidden. This replaces entry 21's "only owner's words" rule: an agent may draft from the owner's answers and the code, and the owner publishes after reading every line.
+- The package `yaml` 2.9.1 (no dependencies of its own) reads the files. It is a development dependency, because only the build script uses it; the site sends no YAML reader to visitors.
+
+**Why YAML over TypeScript:** plain text with no punctuation to get wrong, one file per project, and the files match what the prompt returns, so saving an answer is a copy and paste. **Why not Markdown:** splitting prose back into steps, decisions and numbers breaks as soon as a heading changes.
+
+**Costs accepted:** One more dependency and one more script. Types are no longer checked by TypeScript at the source; the script's checks replace them. The group ids are now plain strings from `index.yaml`.
+

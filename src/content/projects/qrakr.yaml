@@ -1,0 +1,70 @@
+# qrakr. How to edit this file: docs/guides/case-studies.md
+slug: qrakr
+title: qrakr
+summary: QR lost and found tags that let a finder reach the owner without either seeing real contact details.
+group: product
+tags: [Next.js, Vercel Serverless, Supabase Postgres, Stripe, Telnyx, TypeScript]
+live: https://qrakr.com
+code:
+facts:
+  - Finder and owner talk without seeing each other's phone or email
+  - Masked texts and calls through a shared pool of phone numbers
+  - Survived a live duplicate tag bug by making claim one single step
+architecture:
+  # One found report, drawn as a loop: along the top to the database, down to the
+  # email alert, back along the bottom to the chat, and up to the finder again.
+  boxes:
+    - { id: finder, label: Finder phone, col: 0, row: top }
+    - { id: page, label: Found page, col: 1, row: top }
+    - { id: api, label: API function, col: 2, row: top }
+    - { id: db, label: Postgres, col: 3, row: top }
+    - { id: mail, label: Email alert, col: 2, row: bottom }
+    - { id: owner, label: Owner, col: 1, row: bottom }
+    - { id: chat, label: Live chat, col: 0, row: bottom }
+  arrows:
+    - { from: finder, to: page, step: 1 }
+    - { from: page, to: api, step: 2 }
+    - { from: api, to: db, step: 3 }
+    - { from: api, to: mail, step: 4 }
+    - { from: mail, to: owner, step: 5 }
+    - { from: owner, to: chat, step: 6 }
+    - { from: chat, to: finder, step: 7 }
+case_study:
+  published: false
+  intro: qrakr is a lost and found service built on QR stickers. A finder scans the tag with any phone camera and can reach the owner, while neither side ever sees the other's real phone number or email.
+  role: Founder, sole engineer
+  built: 2026 to now
+  problem: |
+    When someone finds a lost wallet, a set of keys or a pet, they usually want to give it back. But they have no safe way to reach the owner. A phone number written on a tag goes to any stranger. Trackers show where an item is, but they do not help a finder return it.
+
+    qrakr is for travellers, people who carry things they care about every day, and pet owners. A finder scans the sticker, needs no app and no account, and the two sides talk through qrakr instead of swapping numbers.
+  steps:
+    - The finder scans the QR sticker with their phone camera and lands on the item's public found page.
+    - The page records the scan and receives a short lived pass that works for this one item only.
+    - When the finder taps "I found this", a serverless function saves the report, opens a private conversation and creates the alert in one all or nothing database step.
+    - Once the finder has their answer, the function sends the owner an email alert in the background.
+    - The owner reads the alert, which never contains the finder's contact details.
+    - The owner replies in a private chat inside the qrakr app.
+    - The finder sees the reply appear live on the same found page, still with no real contact details shared.
+  decisions:
+    - chose: phone features only on the paid plan, including phone verification itself
+      over: free text messages and phone verification for everyone
+      because: Every text, even each verification code, is a message I pay for. Putting the gate on verification means a free account can never cost money before it pays.
+    - chose: masked texts and calls through a small shared pool of Telnyx numbers, with the finder dialling in
+      over: asking the finder for their phone number, or building on Twilio
+      because: Neither side ever sees a real number, and qrakr never stores a finder's phone at all. Telnyx gave the same masking for texts and calls at a lower cost.
+    - chose: a REST API described in one OpenAPI file that everything else follows
+      over: tRPC or GraphQL
+      because: Stripe and Telnyx call in from outside, and a future mobile app must share the same API. The app's types are generated from that one file, so any mismatch fails the build instead of reaching a user.
+  numbers:
+    - value: "3 weeks"
+      label: From an agreed API plan to taking payments
+    - value: "388"
+      label: Automated tests on the business rules
+    - value: "10"
+      label: Riskiest modules held at 100% test coverage
+  now: |
+    qrakr has been live at qrakr.com since July 2026 with paying customers. It is now run by Qrakr Inc., a federal Canadian company, with a published privacy policy and terms of service.
+
+    Next is a shop selling printed sticker packs in Canada, which is ready and waiting on printing. After that, I plan AI designed tags that look like artwork rather than a plain black and white square, so people are happy to put them on things they care about.
+  last_modified: 2026-09-21

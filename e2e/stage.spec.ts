@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { caseStudyProjects } from '../src/content/projects'
+import { caseStudyProjects, projectGroups, projectLink, projects } from '../src/content/projects'
 
 /**
  * The single page stage, as a visitor sees it (docs/product/site.md).
@@ -93,7 +93,7 @@ test.describe('without JavaScript', () => {
   const pages = [
     { path: '/', title: 'Kshitij Patel', text: GREETING },
     { path: '/about', title: 'About | Kshitij Patel', text: /Problem-solving/ },
-    { path: '/projects', title: 'Projects | Kshitij Patel', text: /Serverless Image Pipeline/ },
+    { path: '/projects', title: 'Projects | Kshitij Patel', text: projects[0].summary },
     { path: '/contact', title: 'Contact | Kshitij Patel', text: /The fastest way to reach me/ },
   ]
 
@@ -237,34 +237,39 @@ test('Home says what Kshitij is open to, and Contact links the resume', async ({
   expect(response.headers()['content-type']).toContain('pdf')
 })
 
+// Read from the project files, so editing a project's words never breaks this test (decision 22).
 test('the projects are tiles: one headline, groups, and a tile becomes the headline', async ({ page }) => {
+  const [first, second] = projects
+  const heading = (title: string) => page.getByRole('heading', { level: 2, name: title, exact: true })
+
   await page.goto('/projects')
   await expectSection(page, 'projects')
 
   // The first project is the headline on arrival, with its drawing and its own link.
-  await expect(page.getByRole('heading', { level: 2, name: 'Qrakr' })).toBeVisible()
-  await expect(page.getByRole('img', { name: /^How Qrakr is wired/ })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'qrakr.com' })).toHaveAttribute('href', 'https://qrakr.com')
+  await expect(heading(first.title)).toBeVisible()
+  await expect(page.getByRole('img', { name: `How ${first.title} is wired`, exact: false })).toBeVisible()
+  const firstLink = projectLink(first)
+  if (firstLink) await expect(page.getByRole('link', { name: firstLink.label })).toHaveAttribute('href', firstLink.href)
   const tiles = page.getByRole('button', { name: /^Show / })
-  await expect(tiles).toHaveCount(5)
+  await expect(tiles).toHaveCount(projects.length - 1)
 
   // A small tile becomes the headline, focus follows it, and the old headline becomes a tile.
-  await page.getByRole('button', { name: 'Show Work Board' }).click()
-  const workBoard = page.getByRole('heading', { level: 2, name: 'Work Board' })
-  await expect(workBoard).toBeVisible()
-  await expect(workBoard).toBeFocused()
-  await expect(page.getByRole('button', { name: 'Show Qrakr' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'board.patelkshitij.com' })).toHaveAttribute('href', /board\.patelkshitij\.com/)
+  await page.getByRole('button', { name: `Show ${second.title}`, exact: true }).click()
+  await expect(heading(second.title)).toBeVisible()
+  await expect(heading(second.title)).toBeFocused()
+  await expect(page.getByRole('button', { name: `Show ${first.title}`, exact: true })).toBeVisible()
 
   // A group filter keeps only that group; All brings everything back.
+  const group = projectGroups[projectGroups.length - 1]
+  const inGroup = projects.filter((project) => project.group === group.id)
   const filters = page.getByRole('group', { name: 'Show projects by group' })
-  await filters.getByRole('button', { name: 'Data' }).click()
-  await expect(filters.getByRole('button', { name: 'Data' })).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.getByRole('heading', { level: 2, name: 'Player Performance Prediction' })).toBeVisible()
-  await expect(tiles).toHaveCount(0)
-  await filters.getByRole('button', { name: 'All' }).click()
-  await expect(tiles).toHaveCount(5)
-  await expect(workBoard).toBeVisible()
+  await filters.getByRole('button', { name: group.label, exact: true }).click()
+  await expect(filters.getByRole('button', { name: group.label, exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await expect(heading(inGroup[0].title)).toBeVisible()
+  await expect(tiles).toHaveCount(Math.max(inGroup.length - 1, 0))
+  await filters.getByRole('button', { name: 'All', exact: true }).click()
+  await expect(tiles).toHaveCount(projects.length - 1)
+  await expect(heading(second.title)).toBeVisible()
 })
 
 test('a wrong case study address answers 404, then lands on Home', async ({ page }) => {

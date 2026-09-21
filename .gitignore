@@ -47,3 +47,6 @@ next-env.d.ts
 
 # local preview images and recordings (not part of the site)
 /previews/
+
+# generated from src/content/projects/*.yaml by npm run content:build (decision 22)
+/src/content/projects.generated.json

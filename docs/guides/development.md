@@ -33,6 +33,7 @@ The test browser is stored inside `node_modules`, not system-wide, because the t
 | `npm run test:e2e:install` | Downloads the Chromium build that the end-to-end test uses |
 | `npm run test:e2e` | Builds the site, serves it on port 3100, and clicks through it in Chromium |
 | `npm run docs:check` | Checks the documentation system. See [rules/documentation.md](../rules/documentation.md) |
+| `npm run content:check` | Checks the project files in `src/content/projects/`. See [case-studies.md](case-studies.md) |
 
 ## Open the site at localhost
 
@@ -40,17 +41,16 @@ While `npm run dev` runs, open **http://localhost:3000**, not the "Network" addr
 
 ## Before you commit
 
-Run all five checks: `npm run typecheck`, `npm run lint`, `npm run build`, `npm run test:e2e` and `npm run docs:check`.
+Run all six checks: `npm run content:check`, `npm run typecheck`, `npm run lint`, `npm run build`, `npm run test:e2e` and `npm run docs:check`.
 
 If `npm run test:e2e` fails, the trace of the failed test is saved in `test-results/`. Open it with `npx playwright show-trace <path to trace.zip>` to replay the run step by step.
 
 ## Add or change a project
 
-1. Edit `src/content/projects.ts`. Every entry needs a `slug` (lowercase, dashes), `title`, a one sentence `summary`, a `group`, `tags` and an `architecture`: boxes with an `id`, a short `label`, a `col` from 0 to 4 and a `row` of 0 or 1, and the arrows between them by `id`. Add `live` and `code` when they exist. TypeScript refuses an entry that is missing a required field. The first entry is the headline on arrival.
+1. Follow [case-studies.md](case-studies.md): every project is one YAML file in `src/content/projects/`, and `index.yaml` sets the order. Run `npm run content:check` after editing.
    Open `/projects` and check the drawing reads well; on a phone it scrolls sideways inside its frame, which is expected.
-   To add facts, write up to three short lines in `facts`. To add a case study, fill in `caseStudy` completely and give the arrows a `step` number that matches each line of `steps`. The page at `/projects/<slug>`, the "Read the case study" button, the tile's label and the sitemap entry all appear on their own.
 2. If the Projects page description in `src/content/sections.ts` names projects, keep it true, and set that section's `lastModified` to today.
-3. Run `npm run test:e2e`; the tiles test checks the headline, a tile swap and the filters, and the case study tests run once for each written case study.
+3. Run `npm run test:e2e`; the tiles test checks the headline, a tile swap and the filters, and the case study tests run once for each published case study.
 
 ## Replace the resume
 

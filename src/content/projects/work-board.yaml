@@ -1,0 +1,22 @@
+# Work Board. How to edit this file: docs/guides/case-studies.md
+slug: work-board
+title: Work Board
+summary: 'An AI work board for ADHD users: short time slots, and tasks that plan themselves from what got done.'
+group: product
+tags: [Next.js, Supabase, TypeScript]
+live: https://board.patelkshitij.com
+code:
+facts: []
+architecture:
+  # Drafted from the project's sentence and tools; check against the real code (STATUS entry 28).
+  boxes:
+    - { id: board, label: Board, col: 0, row: top }
+    - { id: app, label: Next.js app, col: 1, row: top }
+    - { id: db, label: Supabase, col: 2, row: top }
+    - { id: planner, label: AI planner, col: 2, row: bottom }
+    - { id: plan, label: Next plan, col: 1, row: bottom }
+  arrows:
+    - { from: board, to: app, step: 1 }
+    - { from: app, to: db, step: 2 }
+    - { from: db, to: planner, step: 3 }
+    - { from: planner, to: plan, step: 4 }

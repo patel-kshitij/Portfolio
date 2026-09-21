@@ -1,20 +1,18 @@
+import data from './projects.generated.json'
+
 /**
- * The projects, in display order (decision 21). The first one is the headline tile on arrival.
- * How the Projects section and the case study pages use this file: docs/reference/architecture.md
+ * The shape of the projects and the helpers the site uses (decisions 21 and 22).
+ * The words live in src/content/projects/, one YAML file per project; `npm run content:build`
+ * checks them and writes projects.generated.json, which this file reads. Never edit that
+ * JSON by hand. How to edit the YAML files: docs/guides/case-studies.md
  */
 
-/** The filter buttons, in the order they are shown. */
-export const projectGroups = [
-  { id: 'product', label: 'Products' },
-  { id: 'backend', label: 'Backend & cloud' },
-  { id: 'data', label: 'Data' },
-] as const
-
-export type ProjectGroup = (typeof projectGroups)[number]['id']
+/** A filter group's id, such as `product`. The groups are listed in src/content/projects/index.yaml. */
+export type ProjectGroup = string
 
 /**
  * One box in an architecture drawing. Boxes sit on a small grid: `col` 0 to 4 from left
- * to right, `row` 0 (top) or 1 (bottom). Keep labels to about 14 characters.
+ * to right, `row` 0 (top) or 1 (bottom); the YAML files say `top` and `bottom`.
  */
 export interface ArchitectureNode {
   id: string
@@ -39,8 +37,8 @@ export interface Architecture {
 }
 
 /**
- * The long read at /projects/<slug>. A project only gets a case study page, and the
- * "Case study" label on its tile, once this is written (decision 21). Never ship placeholders.
+ * The long read at /projects/<slug>. It reaches the site only when its YAML says
+ * `published: true` (decision 22), so a draft never goes live.
  */
 export interface CaseStudy {
   /** Shown under the title and used as the page description. One or two sentences. */
@@ -82,142 +80,14 @@ export interface Project {
   caseStudy?: CaseStudy
 }
 
-export const projects: readonly Project[] = [
-  {
-    slug: 'qrakr',
-    title: 'Qrakr',
-    summary: 'QR tags that let whoever finds your things reach you, without ever seeing your number. My startup.',
-    group: 'product',
-    tags: ['Next.js', 'Supabase', 'Telnyx', 'Stripe', 'Python'],
-    live: 'https://qrakr.com',
-    architecture: {
-      nodes: [
-        { id: 'finder', label: 'Finder phone', col: 0, row: 0 },
-        { id: 'page', label: 'Tag page', col: 1, row: 0 },
-        { id: 'db', label: 'Supabase', col: 2, row: 0 },
-        { id: 'telnyx', label: 'Telnyx bridge', col: 3, row: 0 },
-        { id: 'owner', label: 'Owner phone', col: 4, row: 0 },
-      ],
-      links: [
-        { from: 'finder', to: 'page', step: 1 },
-        { from: 'page', to: 'db', step: 2 },
-        { from: 'db', to: 'telnyx', step: 3 },
-        { from: 'telnyx', to: 'owner', step: 4 },
-      ],
-    },
-  },
-  {
-    slug: 'work-board',
-    title: 'Work Board',
-    summary: 'An AI work board for ADHD users: short time slots, and tasks that plan themselves from what got done.',
-    group: 'product',
-    tags: ['Next.js', 'Supabase', 'TypeScript'],
-    live: 'https://board.patelkshitij.com',
-    architecture: {
-      nodes: [
-        { id: 'board', label: 'Board', col: 0, row: 0 },
-        { id: 'app', label: 'Next.js app', col: 1, row: 0 },
-        { id: 'db', label: 'Supabase', col: 2, row: 0 },
-        { id: 'planner', label: 'AI planner', col: 2, row: 1 },
-        { id: 'plan', label: 'Next plan', col: 1, row: 1 },
-      ],
-      links: [
-        { from: 'board', to: 'app', step: 1 },
-        { from: 'app', to: 'db', step: 2 },
-        { from: 'db', to: 'planner', step: 3 },
-        { from: 'planner', to: 'plan', step: 4 },
-      ],
-    },
-  },
-  {
-    slug: 'serverless-image-pipeline',
-    title: 'Serverless Image Pipeline',
-    summary: 'Upload through API Gateway, process in Lambda and Step Functions, rebuild it all from CloudFormation.',
-    group: 'backend',
-    tags: ['AWS Lambda', 'S3', 'Step Functions', 'CloudFormation'],
-    code: 'https://github.com/patel-kshitij/Serverless-Image-Processing',
-    architecture: {
-      nodes: [
-        { id: 'client', label: 'Client', col: 0, row: 0 },
-        { id: 'api', label: 'API Gateway', col: 1, row: 0 },
-        { id: 'lambda', label: 'Lambda', col: 2, row: 0 },
-        { id: 'sfn', label: 'Step Functions', col: 3, row: 0 },
-        { id: 's3', label: 'S3', col: 3, row: 1 },
-        { id: 'cfn', label: 'CloudFormation', col: 1, row: 1 },
-      ],
-      links: [
-        { from: 'client', to: 'api', step: 1 },
-        { from: 'api', to: 'lambda', step: 2 },
-        { from: 'lambda', to: 'sfn', step: 3 },
-        { from: 'sfn', to: 's3', step: 4 },
-        { from: 'cfn', to: 's3', step: 5 },
-      ],
-    },
-  },
-  {
-    slug: 'skillswap',
-    title: 'SkillSwap',
-    summary: 'A neighbourhood app for offering and asking for skills.',
-    group: 'backend',
-    tags: ['Java', 'Spring', 'Next.js'],
-    code: 'https://github.com/patel-kshitij/Skillswap',
-    architecture: {
-      nodes: [
-        { id: 'web', label: 'Next.js', col: 0, row: 0 },
-        { id: 'api', label: 'Spring API', col: 1, row: 0 },
-        { id: 'offers', label: 'Offers', col: 2, row: 0 },
-        { id: 'requests', label: 'Requests', col: 2, row: 1 },
-      ],
-      links: [
-        { from: 'web', to: 'api' },
-        { from: 'api', to: 'offers' },
-        { from: 'api', to: 'requests' },
-      ],
-    },
-  },
-  {
-    slug: 'ecomart-backend',
-    title: 'Ecomart Backend',
-    summary: 'REST APIs for a second-hand marketplace: listings, users and orders.',
-    group: 'backend',
-    tags: ['Python', 'Django', 'REST'],
-    code: 'https://github.com/patel-kshitij/Ecomart-be',
-    architecture: {
-      nodes: [
-        { id: 'client', label: 'Client', col: 0, row: 0 },
-        { id: 'api', label: 'Django REST', col: 1, row: 0 },
-        { id: 'listings', label: 'Listings', col: 2, row: 0 },
-        { id: 'users', label: 'Users', col: 2, row: 1 },
-        { id: 'orders', label: 'Orders', col: 3, row: 0 },
-      ],
-      links: [
-        { from: 'client', to: 'api' },
-        { from: 'api', to: 'listings' },
-        { from: 'api', to: 'users' },
-        { from: 'listings', to: 'orders' },
-      ],
-    },
-  },
-  {
-    slug: 'player-performance-prediction',
-    title: 'Player Performance Prediction',
-    summary: 'Predicting how FIFA players will perform in their next matches from past match data.',
-    group: 'data',
-    tags: ['Python', 'Data science'],
-    // The owner is adding the code link (STATUS entry 23).
-    architecture: {
-      nodes: [
-        { id: 'data', label: 'Match data', col: 0, row: 0 },
-        { id: 'model', label: 'Model', col: 1, row: 0 },
-        { id: 'prediction', label: 'Prediction', col: 2, row: 0 },
-      ],
-      links: [
-        { from: 'data', to: 'model' },
-        { from: 'model', to: 'prediction' },
-      ],
-    },
-  },
-]
+/** The filter buttons, in the order they are shown. */
+export const projectGroups: readonly { id: ProjectGroup; label: string }[] = data.groups
+
+/**
+ * Every project, in display order. The first one is the headline tile on arrival.
+ * The generated file has already been checked by scripts/content-build.mjs, so it is trusted here.
+ */
+export const projects = data.projects as unknown as readonly Project[]
 
 /** Live, Code or Soon, worked out from the links (decision 21). */
 export type ProjectStatus = 'live' | 'code' | 'soon'
