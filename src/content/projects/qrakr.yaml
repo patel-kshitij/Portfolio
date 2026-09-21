@@ -30,7 +30,7 @@ architecture:
     - { from: owner, to: chat, step: 6 }
     - { from: chat, to: finder, step: 7 }
 case_study:
-  published: false
+  published: true
   intro: qrakr is a lost and found service built on QR stickers. A finder scans the tag with any phone camera and can reach the owner, while neither side ever sees the other's real phone number or email.
   role: Founder, sole engineer
   built: 2026 to now
