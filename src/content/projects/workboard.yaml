@@ -29,7 +29,7 @@ architecture:
     - { from: route, to: pushsvc, step: 5 }
     - { from: pushsvc, to: phone, step: 6 }
 case_study:
-  published: false
+  published: true
   intro: Workboard is a personal planner that checks in on me while I work. It only counts time I confirm, so my records stay honest.
   role: Sole engineer
   built: 2026 to now
