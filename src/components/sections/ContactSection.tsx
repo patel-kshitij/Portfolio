@@ -2,23 +2,26 @@ import { GitHubIcon, LinkedInIcon } from '@/components/icons'
 import { site } from '@/lib/site'
 import styles from '@/styles/Sections.module.scss'
 
-/** Contact: how to reach Kshitij, plus his profiles. */
+/** Contact: what Kshitij is open to, how to reach him, his resume, and his profiles. */
 export default function ContactSection() {
   return (
     <div className={styles.contact}>
+      <p>{site.availability.full}</p>
       <p>
-        The fastest way to reach me is through{' '}
+        The fastest way to reach me is by{' '}
         <a href={`mailto:${site.email}`} className={styles.textLink}>
-          mail
+          email
         </a>
-        .
+        . My{' '}
+        <a href={site.resume} target="_blank" rel="noopener noreferrer" className={styles.textLink}>
+          resume
+        </a>{' '}
+        is one page, as a PDF.
       </p>
-      <p>Thanks for visiting.</p>
       <p>
-        New updates will come for the portfolio and all the suggestions are welcome. The source for the
-        portfolio is{' '}
+        This site is open source; the code is{' '}
         <a href={site.repo} target="_blank" rel="noopener noreferrer" className={styles.textLink}>
-          here
+          on GitHub
         </a>
         .
       </p>

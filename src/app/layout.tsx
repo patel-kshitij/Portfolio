@@ -1,11 +1,11 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { JetBrains_Mono } from 'next/font/google'
 import type { ReactNode } from 'react'
 import ShootingStar from '@/components/ShootingStar'
 import StarBackground from '@/components/StarBackground'
 import Stage from '@/components/stage/Stage'
-import { site } from '@/lib/site'
-import './globals.css'
+import { personJsonLd, site } from '@/lib/site'
+import './globals.scss'
 
 // Downloaded at build time and served from this site (decision 6).
 const mono = JetBrains_Mono({
@@ -46,10 +46,25 @@ export const metadata: Metadata = {
   },
 }
 
+/**
+ * The browser reads this before any stylesheet loads: `themeColor` paints the phone's
+ * browser bar to match the night sky, and `colorScheme` stops a white flash on the
+ * first paint. The black behind the stars is painted in `src/app/globals.scss`.
+ */
+export const viewport: Viewport = {
+  themeColor: '#000000',
+  colorScheme: 'dark',
+}
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={mono.variable}>
       <body>
+        {/* Who the site is about, for search engines. Values come from src/lib/site.ts. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd()) }}
+        />
         <StarBackground />
         <ShootingStar />
         {/* The pages render nothing; the stage draws every section. See docs/reference/architecture.md */}

@@ -2,7 +2,7 @@
 title: The site
 type: product
 owner: Kshitij
-reviewed: 2026-09-16
+reviewed: 2026-09-18
 ---
 
 # The site
@@ -15,7 +15,8 @@ Kshitij Patel's personal portfolio at www.patelkshitij.com. It introduces him, s
 
 - A night sky with twinkling stars and the occasional shooting star, always behind everything else.
 - A purple card in the middle of the screen. The card never disappears; only what is inside it changes.
-- Four sections in a fixed order: Home, About, Projects, Contact. A round arrow button moves to the next section. On the last section the arrow turns to point back, then glides to the middle with the card, and returns to Home. The exact order, titles and page descriptions live in `src/content/sections.ts`.
+- Four sections in a fixed order: Home, About, Projects, Contact. Home greets the visitor and says what Kshitij is open to. About is a few paragraphs in his own voice. Projects is a constellation: a window onto the sky with one named star per project, joined by faint lines. One star is always selected and glows, and a panel beside the sky (below it on a phone) shows that project's sentence, tools and link. Hovering, tapping or tabbing to a star selects it. The entries and star positions live in `src/content/projects.ts`. Contact has the availability sentence, the email link, the resume (a PDF at `/resume.pdf`, without a phone number), and the GitHub and LinkedIn links.
+- A round arrow button moves to the next section. On the last section the arrow turns to point back, then glides to the middle with the card, and returns to Home. The exact order, titles and page descriptions live in `src/content/sections.ts`.
 
 ## How it must behave
 
@@ -24,10 +25,12 @@ Kshitij Patel's personal portfolio at www.patelkshitij.com. It introduces him, s
 3. **Opening an address directly shows that section straight away,** already visible, with its own page title and description for search engines and link previews.
 4. **The intro plays once per visit.** When a visit starts on Home, the line draws itself, then the greeting, the arrow and the icons appear. Coming back to Home later in the same visit skips the intro.
 5. **Wrong addresses send the visitor to Home,** while the server still tells search engines that the page does not exist.
-6. **Reduced motion is respected.** Visitors whose device asks for less motion get fades only, with no sliding or resizing.
+6. **Reduced motion is respected on the whole screen.** Visitors whose device asks for less motion get fades only, with no sliding or resizing, and the sky goes still: the stars stop blinking and no shooting stars appear.
 7. **Text stays readable on phones.** Body text is never smaller than 14px, and a tall section scrolls inside the card.
 8. **Everything works from the keyboard.** The arrow and all other links are real links.
+9. **The constellation works from the keyboard and without JavaScript.** Every star is a real button with a name; Tab moves between them and focusing one selects it. Without JavaScript all six projects are shown in full. Selecting a star never changes the card's size.
+10. **The Left and Right arrow keys, and a sideways swipe, move between sections.** Right and a swipe to the left go forward, and after the last section that means Home, like the arrow. Left and a swipe to the right go back and stop at Home. Up and Down scroll a tall section as usual. A mouse drag never moves the stage. The keyboard and mouse icons in the card header say this in a tooltip and to screen readers.
 
 ## Deliberately left out
 
-A dark and light switch, an accent colour changer, and remembering visitor choices. See [DECISIONS.md](../DECISIONS.md), entry 4.
+A dark and light switch, an accent colour changer, and remembering visitor choices ([DECISIONS.md](../DECISIONS.md), entry 4). A contact form, a blog and a skills logo wall (entry 17). A navigation menu and a footer are not left out for good; they are deferred, with the options recorded in entry 17.

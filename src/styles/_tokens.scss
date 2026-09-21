@@ -16,6 +16,7 @@ $text-min: 0.875rem; // 14px, the smallest body text allowed (decision 7)
 // Breakpoints
 $bp-medium: 730px; // large phones and small tablets
 $bp-small: 450px; // phones held upright
+$bp-tiny: 380px; // the narrowest phones still in use, 320px to 375px
 $short-screen: 450px; // phones held sideways
 
 // Body text size for every section, stepping down on smaller screens.

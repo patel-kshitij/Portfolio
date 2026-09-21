@@ -155,3 +155,102 @@ Append-only. Never edit or delete an entry; add a new one that names the entry i
 **Why:** Once the block is current, `next dev` leaves `AGENTS.md` alone, so it can never turn up as a surprise uncommitted change on the owner's machine. Typing the block by hand would risk one byte differing, which would make Next.js rewrite the file on every run.
 
 **Consequences:** If a future Next.js release changes the block's wording, `next dev` rewrites it once and the diff comes back. Leave the block exactly as Next.js wrote it. Because `AGENTS.md` exists and hosts the block, no vendor named instructions file is ever created here.
+
+## 16. First batch of fixes from the 2026-09-18 site review (2026-09-18)
+
+**Context:** The owner asked for a full review of the live site. It was read file by file and then measured in a browser at 320x568, 740x360 and full desktop. The findings are recorded in [STATUS.md](STATUS.md). This entry covers only the first batch: the changes that needed no new structure. Navigation and the content rewrite are separate work.
+
+**Decisions, one per change:**
+
+1. **One focus ring for every link.** `src/app/globals.css` became `src/app/globals.scss` so it can read `src/styles/_tokens.scss`, and it now carries a single `a:focus-visible` rule. The two copies of that rule in `Stage.module.scss` and `Sections.module.scss` are gone; those links keep only their `border-radius`, which the outline follows. Before this, the project links and the links inside Contact had no visible focus ring at all on the purple card.
+
+2. **The sky obeys reduced motion.** [product/site.md](product/site.md) point 6 promised that visitors who ask for less motion get fades only. That was true of the card and false of the sky: 38 stars were measured blinking on the live site with 4 shooting stars on screen at once, none of it guarded. Blinking is now inside `@media (prefers-reduced-motion: no-preference)`. Shooting stars are not rendered at all for those visitors, and their timers never start, because a shooting star that does not move is only a white smear parked on the sky. The owner chose that over freezing them in place.
+
+3. **The name no longer clips at 320px.** At 2rem the words "Kshitij Patel" need 250px and a 320px screen leaves 248px inside the card, which has `overflow: hidden`, so the last letter was shaved. A new `$bp-tiny: 380px` breakpoint steps the name down to 1.75rem. The owner chose this over letting the name wrap onto two lines or trimming the card's padding, because it keeps the greeting's shape and is invisible on any wider phone.
+
+4. **Every shooting star gets its own number.** A counter in a ref replaces `key={Date.now()}` (STATUS entry 11).
+
+5. **Phone home screen and browser bar.** A `viewport` export in `src/app/layout.tsx` sets `themeColor` to the black of the sky and owns `colorScheme`, which moved out of the stylesheet so the fact has one home. `src/app/icon.png` and `src/app/apple-icon.png` were drawn for this change: the night sky with a purple K in JetBrains Mono, the site's own font and colour.
+
+6. **The sitemap stops lying about dates.** It reported `new Date()`, so every build claimed all four pages had changed. Each section in `src/content/sections.ts` now carries its own `lastModified`, set by hand when its words change.
+
+7. **The `host` line is out of `robots.ts`.** Only Yandex reads that directive.
+
+8. **Person structured data.** `src/lib/site.ts` gained `personJsonLd()`, built entirely from the values already in that file, and the root layout renders it as one JSON-LD script. Nothing about Kshitij is written twice, and nothing is invented: it carries the name, address, description, email and the two profile links that the site already shows.
+
+**Not chosen in this batch:** anything that changes what the site says, or that adds navigation. Those are STATUS entries 3 and 14 and get their own decisions.
+
+**Consequences:** Items 2, 3 and 5 are visible changes and want a look on a real screen before the commit. `src/app/globals.css` no longer exists; anything importing it must import `globals.scss`. Adding a section to `src/content/sections.ts` now requires a `lastModified` date, and TypeScript will say so.
+
+## 17. Content refresh, project cards, availability, keyboard and swipe, resume (2026-09-18)
+
+**Context:** The owner asked what the site should gain next and for a review of its words. The About text called him a "newbie", stated an age, listed Python, Java and Go, and said nothing about AWS, serverless, TypeScript or the client work he has shipped. The site description repeated the same outdated list. The Projects section had four one-line coursework entries, one without a link, and none of his real work. Contact had no availability signal and no resume. The keyboard and mouse icons promised interaction that did not exist (STATUS entries 3 and 17).
+
+**Options put to the owner, and what he chose:**
+
+- *Navigation menu:* inside the card header (N1), a bar across the top of the screen (N2), dots down the edge (N3), or not yet. **Not yet.** The options stay here for the next round; STATUS entry 14 remains open.
+- *Footer:* a thin dim line under the card (F1) or none (F2). **None.** The resume link lives on Contact.
+- *Project cards:* richer cards in the current list (B1), a page per project (B2), or screenshots (B3). **B1.** A page per project would leave the four-section loop and needs its own decision.
+- *About tone:* same voice with new facts, professional and short, or unchanged. **Same voice, new facts.** The jokes and the travel and food paragraph stay; every claim now comes from his resume or his own words.
+- *Availability line:* three wordings. **The warmer one:** "Looking for my next team, and taking freelance work meanwhile." under the name on Home, and a full sentence on Contact. One value in `src/lib/site.ts` with two lengths.
+- *Resume:* a PDF in the repository, a section built from data, or none. **PDF**, served as `public/resume.pdf` and linked from Contact. **The copy on the site has the phone number removed**; the full resume stays off the internet. The owner called the current PDF temporary; replacing the file is the only step when the final one is ready.
+- *Keyboard and swipe:* build it or drop the icons. **Build it.**
+
+**Decisions on the details:**
+
+1. **Projects are structured.** Each entry in `src/content/projects.ts` carries `years`, `problem`, `built`, `tags`, and optional `live` and `code` links. The card title links to the live product first, the code second, and is plain text otherwise. Qrakr and Work Board are new. Player Performance Prediction stays; the owner is adding its code link (STATUS entry 23).
+2. **Only Left and Right move the stage.** Up and Down are left to the browser, because they scroll a tall section inside the card (decision 7). Right follows the arrow, so after the last section it goes to Home. Left goes to the previous section and stops at Home; wrapping backwards from Home to Contact would surprise more people than it helps. A key press is ignored while a modifier key is held or while a form control has focus.
+3. **Only fingers swipe.** A mouse drag selects text and keeps doing so. A swipe needs at least 50px sideways and more sideways than up or down. The card gets `touch-action: pan-y`, so the browser keeps vertical scrolling and leaves sideways movement to the handlers. A swipe to the left goes forward, a swipe to the right goes back, with the same stops as the keys.
+4. **Keys and swipes use the router, not a link.** Rule 6 in [rules/frontend.md](rules/frontend.md) said sections only change through real links. That stays true for anything a visitor clicks or taps. Key presses and swipes are not clicks, so `useStageInput` calls `router.push` with `scroll: false`. The rule now says so.
+5. **The icons explain themselves.** The keyboard and mouse icons carry a tooltip and a visually hidden sentence for screen readers, both from one constant in `src/components/stage/useStageInput.ts`.
+6. **Pages the words changed on get a new `lastModified`:** all four, because Home gained the availability line.
+
+**Not chosen:** a contact form (needs a backend or a paid service and attracts spam), a blog (an empty one looks worse than none), a skills logo wall (the tools are woven into About and the project tags instead), analytics (STATUS entry 21 stays open), and Up and Down as section keys.
+
+**Consequences:** Every section's words changed, so the whole site wants a read on a real screen before the commit. `src/content/projects.ts` has a new shape; TypeScript rejects an entry without `years`, `problem`, `built` and `tags`. The e2e suite gained four tests. `public/` exists for the first time. The folder in the repository root named after an AI vendor, which held three screenshots from the 2026-09-18 review, was emptied into `previews/` (decision 14) and removed, with the owner's permission for that one deletion.
+
+## 18. Projects are a grid of tiles (2026-09-18)
+
+**Replaces:** detail 1 of entry 17 (the shape of a project entry). The rest of entry 17 holds.
+
+**Context:** The owner looked at the stacked cards from entry 17 and rejected them: two paragraphs per project read like a resume, six tall cards made the section scroll inside the card, and the boxes, the pill tags, the lone "Live" link and the small year next to each title looked wrong to him.
+
+**Options:** one project at a time with dots to step through; a grid of small tiles; a compact list that opens on tap; the same stacked cards with less text. **Chosen: the grid.**
+
+**Decision:** `src/content/projects.ts` entries carry `title`, one `summary` sentence, `tags`, and optional `live` and `code`. The years and the two paragraphs are gone. Each tile shows the title, the sentence, and the tools as one dim line separated by middle dots. The title links to the live site first and the code second, the link stretches over the whole tile so the tile is one target, and a small dim "live" or "code" marker in the corner says where it leads. Tiles fill the card three across on a desktop, two on a tablet and one on a phone, using `auto-fit` with a 300px minimum and a 1100px cap on the grid, so no breakpoint rule is needed and a fourth column never appears.
+
+**Why:** Six tiles fit a desktop screen without scrolling. One sentence forces each project to say the one thing that matters. A tile that is entirely a link needs no separate "Live" word.
+
+**Consequences:** A phone still scrolls the section, but each tile is a third of the old height. The e2e project test now checks tiles. The `years` field is gone; if dates come back they get their own decision.
+
+## 19. Projects are a constellation (2026-09-18)
+
+**Replaces:** entry 18 (the tile grid). Entry 18's content shape (`title`, one `summary`, `tags`, optional `live` and `code`) still holds; only how it is shown changes.
+
+**Context:** With the tiles in place the owner said the site still felt like "the basic site that everyone has" and asked for something built around the theme. Five ideas were put to him: the real night sky over Halifax as the background, the projects drawn as a constellation, a live signal from his work, and textures (star streaks on navigation, a sky that follows the mouse, mission-log wording, a HUD-styled card). **He chose the constellation** and no textures.
+
+**Options on the constellation, and his choices:**
+
+- *Where it lives:* in the real sky behind a smaller card, or inside the card as a window onto the sky. **Inside the card.** The sky behind the card has nowhere to be on a phone, and the card rule (it holds everything) would break.
+- *Shape:* the letter K, a free shape, or the Big Dipper's. **A free shape.**
+- *A click on a star:* selects it, or opens its link. **Selects it**, with the first star (Qrakr) selected on arrival so the panel is never empty.
+
+**Decision:** `src/components/sections/ProjectsSection.tsx` draws a panel with the proportions of a 100 by 60 drawing space: faint fixed dust, the lines from `constellationLines`, and one real `<button>` per project placed by percentage from its `star` position in `src/content/projects.ts`. Size 3 is the main work, size 1 the smallest. Hovering, focusing or clicking a star selects it; the panel beside the sky (below it on a phone) shows that project's title, sentence, tools and link. All six panels are in the HTML, stacked in one grid cell so the card never changes size; the unselected ones are `visibility: hidden`, and a `<noscript>` style shows them all when JavaScript is off. Each star has a name for screen readers ("Qrakr, project 1 of 6") and `aria-pressed`. The lines draw themselves in on arrival and the panel fades between projects; visitors who ask for reduced motion get neither, through Motion's `useReducedMotion`. Timings live in `timing.ts` under `constellation`. The focus ring in `globals.scss` now covers buttons too, since the stars are the site's first buttons.
+
+**Why:** It is the one idea where the theme carries the content instead of sitting behind it, and the card keeps its rules.
+
+**Details settled while building:** the lines must not use `vector-effect: non-scaling-stroke`, because Motion draws them with a dash pattern and that setting makes browsers measure the dashes in pixels, which leaves gaps; the stroke is in drawing units instead. Labels sit on the side named by `labelSide`, chosen by hand so no label runs off the panel or over another on a 375px phone.
+
+**Consequences:** `src/styles/Constellation.module.scss` is new and the tile styles are gone. Adding a project now means choosing a position, a size, a label side and at least one line. The e2e project test checks selection, the card's height and the keyboard. About 5 KB more JavaScript. The other ideas (the real Halifax sky, the live signal, the textures) are not rejected; they wait for the owner.
+
+## 20. Node.js 24, pinned in package.json (2026-09-21)
+
+**Context:** Vercel disables Node.js 20 on 2026-10-01; after that, a project set to 20 fails on every new deployment. `package.json` named no Node version, so Vercel used the one picked in the project's dashboard settings, which was 20.
+
+**Options:** pin `24.x` in `package.json`; pin `22.x` in `package.json`; change only the dashboard setting. **Chosen: pin `24.x`.**
+
+**Decision:** `package.json` has `"engines": { "node": "24.x" }`, which overrides the dashboard setting on every deployment. `@types/node` moves to `^24.0.0` so the types match the runtime.
+
+**Why:** A version written in the repository is visible in review and cannot drift in a dashboard. 24 is Vercel's default and has the longest support left (about April 2028); 22 ends about April 2027 and would mean doing this again within a year. Next.js 16 needs Node 20.9 or newer, so 24 is inside its range.
+
+**Consequences:** The owner's computer runs Node 22; npm warns about the engine until it is updated to 24, and the site still builds. `npm install` must be run once so `package-lock.json` records the new `engines` and `@types/node`. The dashboard setting no longer matters but can be set to 24.x too, so it does not mislead.

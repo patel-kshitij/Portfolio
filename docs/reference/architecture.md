@@ -2,7 +2,7 @@
 title: Architecture
 type: reference
 owner: Kshitij
-reviewed: 2026-09-16
+reviewed: 2026-09-18
 ---
 
 # Architecture
@@ -29,18 +29,21 @@ Each address still has its own page file, but that file only gives search engine
 | --- | --- | --- |
 | Root layout | `src/app/layout.tsx` | Loads the font, sets site-wide metadata, draws the sky, wraps everything in the stage |
 | Sky | `src/components/StarBackground.tsx`, `src/components/ShootingStar.tsx` | Background animation, unchanged by the stage |
-| Section list | `src/content/sections.ts` | Order, addresses, link labels, title words, page metadata, sitemap priority |
-| Project list | `src/content/projects.ts` | The entries shown in the Projects section |
+| Section list | `src/content/sections.ts` | Order, addresses, link labels, title words, page metadata, sitemap priority, the next and previous section |
+| Project list | `src/content/projects.ts` | The projects: title, one sentence, tags, links, and each one's place in the constellation |
+| Site facts | `src/lib/site.ts` | Name, address, email, profile links, the resume path, the availability line |
+| Resume | `public/resume.pdf` | Served as is at `/resume.pdf`; a copy without the phone number |
 | Stage | `src/components/stage/Stage.tsx` | Picks the section from the address, runs every transition, applies the intro rule, sends unknown addresses home |
 | Title | `src/components/stage/StageTitle.tsx` | Rolls the title words over |
 | Arrow | `src/components/stage/NextLink.tsx` | Link to the next section; on the last section it turns around, then glides to the middle |
 | Timings | `src/components/stage/timing.ts` | Every duration and delay used by the stage |
-| Sections | `src/components/sections/` | Content only, one component per section |
+| Input | `src/components/stage/useStageInput.ts` | Left and Right arrow keys and sideways swipes, plus the hint the icons show |
+| Sections | `src/components/sections/` | Content only, one component per section. `ProjectsSection` draws the constellation and keeps the selected star as its own state |
 | Icons | `src/components/icons.tsx` | Every SVG icon |
 | Page files | `src/app/page.tsx`, `src/app/about/page.tsx`, `src/app/projects/page.tsx`, `src/app/contact/page.tsx` | Metadata only; they render nothing |
 | Not found | `src/app/not-found.tsx` | A short "taking you home" note for the moment before the redirect |
 | Sitemap | `src/app/sitemap.ts` | Built from the section list |
-| Styles | `src/styles/_tokens.scss`, `src/styles/Stage.module.scss`, `src/styles/Sections.module.scss`, `src/app/globals.css` | Colours, sizes, and the look of the card and sections |
+| Styles | `src/styles/_tokens.scss`, `src/styles/Stage.module.scss`, `src/styles/Sections.module.scss`, `src/styles/Constellation.module.scss`, `src/app/globals.scss` | Colours, sizes, and the look of the card and sections |
 | End-to-end test | `e2e/stage.spec.ts`, `playwright.config.ts` | Clicks through the built site in Chromium |
 
 ## What happens on a click
@@ -64,8 +67,10 @@ Measured in a production build in Chromium: the old content is gone by about 0.3
 - **The intro.** `Stage` keeps a `navigated` state that becomes true the first time the address moves away from a known section. It is updated during render, following React's "adjusting some state when a prop changes" pattern, because React's lint rules forbid reading refs during render. The intro plays only while `navigated` is false and the section is Home. On that first render the divider, greeting, arrow and icons start hidden and animate in; every other section is prerendered visible.
 - **Unknown addresses.** Next.js answers 404 and renders `src/app/not-found.tsx` through `{children}`. `Stage` finds no matching section, draws no card, and calls `router.replace('/')`. Replacing (instead of pushing) keeps the bad address out of the history, so Back does not return to it. Because the first section shown is then Home, the intro plays.
 - **Back and Forward.** They change the address exactly like a link does, so the same sequence runs.
+- **Arrow keys and swipes.** `useStageInput` listens for `keydown` on the window and for pointer events on the card. Right, or a swipe to the left, pushes the next section's address; Left, or a swipe to the right, pushes the previous one and does nothing on Home. It calls `router.push` with `scroll: false`, and from there the sequence is the same as for a link. Only `pointerType === 'touch'` counts as a swipe, and the card's `touch-action: pan-y` keeps vertical scrolling with the browser so a sideways finger still reaches `pointerup`.
 - **One spring for everything.** `MotionConfig` gives every layout animation the card's spring, so the card, header, line and content move in step. The arrow is the one exception: it uses the same length without the bounce, so it comes to a clean stop.
-- **Reduced motion.** `MotionConfig reducedMotion="user"` turns off movement and resizing for visitors who ask for less motion. Fades remain.
+- **Reduced motion.** `MotionConfig reducedMotion="user"` turns off movement and resizing on the card for visitors who ask for less motion; fades remain. The sky sits outside that config and guards itself: blinking is wrapped in `@media (prefers-reduced-motion: no-preference)` and `ShootingStar` renders nothing and starts no timers.
+- **The constellation.** The Projects section is a panel with a fixed 100 by 60 drawing space. An SVG underneath holds the dust and the lines (`m.line` animating `pathLength` on arrival); the stars are HTML buttons placed by percentage on top, so they are real buttons with real focus. All six detail panels are stacked in one grid cell with a minimum height, so selecting a star changes words, not the card's size, and the stage never has to re-measure. The selection is plain React state inside the section; nothing about it reaches the address.
 - **The sky and the page background.** The black background is painted on `html` only. The star layer sits at `z-index: -1`, so a background on `body` (which now has height, because the stage is in the normal page flow) would cover the stars.
 
 ## Size and cost

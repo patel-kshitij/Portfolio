@@ -1,13 +1,29 @@
 "use client"
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import shootingStarConfig from '@/config/shootingStarConfig';
 import styles from '@/styles/ShootingStar.module.scss';
 
 const ShootingStar: React.FC = () => {
     const [shootingStars, setShootingStars] = useState<React.ReactElement[]>([]);
+    // A shooting star is nothing but movement, so visitors who ask for less motion
+    // get none at all and no timers run for them (docs/product/site.md, point 6).
+    const [wantsMotion, setWantsMotion] = useState(false);
+    // Every star ever created gets its own number, so two stars born in the same
+    // millisecond can never share a React key.
+    const nextKey = useRef(0);
 
     useEffect(() => {
+        const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const read = () => setWantsMotion(!query.matches);
+        read();
+        query.addEventListener('change', read);
+        return () => query.removeEventListener('change', read);
+    }, []);
+
+    useEffect(() => {
+        if (!wantsMotion) return;
+
         // Every timer this effect starts, so all of them can be stopped again.
         // Development mode mounts a component twice; without this the first loop
         // keeps running forever alongside the second one.
@@ -33,7 +49,7 @@ const ShootingStar: React.FC = () => {
 
             const shootingStarElement = (
                 <div
-                    key={Date.now()}
+                    key={nextKey.current++}
                     className={styles.shootingStarContainer}
                     style={{
                         top: `${startTop}px`,
@@ -77,7 +93,7 @@ const ShootingStar: React.FC = () => {
             // removal timer has just been cleared.
             setShootingStars([]);
         };
-    }, []);
+    }, [wantsMotion]);
 
     return <div className={styles.shootingStarContainerWrapper}>{shootingStars}</div>;
 };

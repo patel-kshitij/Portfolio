@@ -92,7 +92,7 @@ test.describe('without JavaScript', () => {
   const pages = [
     { path: '/', title: 'Kshitij Patel', text: GREETING },
     { path: '/about', title: 'About | Kshitij Patel', text: /Problem-solving/ },
-    { path: '/projects', title: 'Projects | Kshitij Patel', text: /Serverless Image Processor/ },
+    { path: '/projects', title: 'Projects | Kshitij Patel', text: /Serverless Image Pipeline/ },
     { path: '/contact', title: 'Contact | Kshitij Patel', text: /The fastest way to reach me/ },
   ]
 
@@ -160,6 +160,109 @@ test('on the last section the arrow sits in the middle and points back', async (
       return placement.fromLeft < placement.fromCentre
     })
     .toBe(true)
+})
+
+test('the Left and Right arrow keys move between sections', async ({ page }) => {
+  await page.goto('/about')
+  await expectSection(page, 'about')
+  await markDocument(page)
+
+  await page.keyboard.press('ArrowRight')
+  await expect(page).toHaveURL('/projects')
+  await expectSection(page, 'projects')
+
+  await page.keyboard.press('ArrowLeft')
+  await expect(page).toHaveURL('/about')
+  await expectSection(page, 'about')
+
+  // Left stops at Home; Right after the last section goes to Home, like the arrow.
+  await page.keyboard.press('ArrowLeft')
+  await expect(page).toHaveURL('/')
+  await expectSection(page, 'home')
+  await page.keyboard.press('ArrowLeft')
+  await expect(page).toHaveURL('/')
+
+  await page.goto('/contact')
+  await expectSection(page, 'contact')
+  await markDocument(page)
+  await page.keyboard.press('ArrowRight')
+  await expect(page).toHaveURL('/')
+  await expectSection(page, 'home')
+  await expectSameDocument(page)
+})
+
+/** A finger travelling `dx` pixels sideways across the card. Positive is to the right. */
+async function swipe(page: Page, dx: number) {
+  const card = page.getByRole('main')
+  const touch = { pointerType: 'touch', isPrimary: true, pointerId: 1, clientX: 300, clientY: 300 }
+  await card.dispatchEvent('pointerdown', touch)
+  await card.dispatchEvent('pointerup', { ...touch, clientX: touch.clientX + dx })
+}
+
+test('a sideways swipe moves between sections, a mouse drag does not', async ({ page }) => {
+  await page.goto('/about')
+  await expectSection(page, 'about')
+
+  await swipe(page, -120)
+  await expect(page).toHaveURL('/projects')
+  await expectSection(page, 'projects')
+
+  await swipe(page, 120)
+  await expect(page).toHaveURL('/about')
+  await expectSection(page, 'about')
+
+  // Too short to count.
+  await swipe(page, -20)
+  await expect(page).toHaveURL('/about')
+
+  // A mouse selecting text must never move the stage.
+  const card = page.getByRole('main')
+  await card.dispatchEvent('pointerdown', { pointerType: 'mouse', isPrimary: true, clientX: 300, clientY: 300 })
+  await card.dispatchEvent('pointerup', { pointerType: 'mouse', isPrimary: true, clientX: 100, clientY: 300 })
+  await expect(page).toHaveURL('/about')
+})
+
+test('Home says what Kshitij is open to, and Contact links the resume', async ({ page, request }) => {
+  await page.goto('/')
+  await expectSection(page, 'home')
+  await expect(page.getByText(/freelance work/)).toBeVisible()
+
+  await page.goto('/contact')
+  await expectSection(page, 'contact')
+  const resume = page.getByRole('link', { name: 'resume' })
+  await expect(resume).toHaveAttribute('href', '/resume.pdf')
+  const response = await request.get('/resume.pdf')
+  expect(response.status()).toBe(200)
+  expect(response.headers()['content-type']).toContain('pdf')
+})
+
+test('the projects are stars: each one selects, and the panel shows it', async ({ page }) => {
+  await page.goto('/projects')
+  await expectSection(page, 'projects')
+
+  const stars = page.getByRole('button', { name: /project \d of \d/ })
+  expect(await stars.count()).toBeGreaterThan(3)
+
+  // The first star is selected on arrival, so the panel is never empty.
+  const first = page.getByRole('button', { name: 'Qrakr, project 1 of 6' })
+  await expect(first).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('heading', { level: 2, name: 'Qrakr' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Live site' })).toHaveAttribute('href', 'https://qrakr.com')
+
+  // A click selects another star; the panel follows and the card keeps its size.
+  const cardBefore = await page.getByRole('main').boundingBox()
+  await page.getByRole('button', { name: /^Work Board, project/ }).click()
+  await expect(first).toHaveAttribute('aria-pressed', 'false')
+  await expect(page.getByRole('heading', { level: 2, name: 'Work Board' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 2, name: 'Qrakr' })).toBeHidden()
+  await expect(page.getByRole('link', { name: 'Live site' })).toHaveAttribute('href', /board\.patelkshitij\.com/)
+  const cardAfter = await page.getByRole('main').boundingBox()
+  expect(cardAfter?.height).toBe(cardBefore?.height)
+
+  // Keyboard: focusing a star selects it too.
+  await page.getByRole('button', { name: /^SkillSwap, project/ }).focus()
+  await expect(page.getByRole('heading', { level: 2, name: 'SkillSwap' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Code on GitHub' })).toHaveAttribute('href', /github\.com/)
 })
 
 test('links that leave the site open in a new tab safely', async ({ page }) => {

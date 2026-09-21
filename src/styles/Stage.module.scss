@@ -28,6 +28,21 @@
   overflow: hidden;
   color: t.$text;
   background: radial-gradient(circle, t.$purple-deep 0%, t.$purple-deep-soft 100%);
+  // The browser keeps vertical scrolling; sideways movement stays with the swipe handlers.
+  touch-action: pan-y;
+}
+
+// Read by screen readers, never drawn.
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .header {
@@ -97,12 +112,8 @@
 
 .arrow {
   display: inline-flex;
+  // The focus ring is the shared one in src/app/globals.scss; it follows this radius.
   border-radius: 50%;
-
-  &:focus-visible {
-    outline: 2px solid t.$purple-light;
-    outline-offset: 4px;
-  }
 }
 
 .arrowCircle {

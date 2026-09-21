@@ -1,3 +1,5 @@
+@use '../styles/tokens' as t;
+
 *,
 *::before,
 *::after {
@@ -12,14 +14,15 @@ body {
   overflow-x: hidden;
 }
 
+// The colour scheme is declared once, in the `viewport` export of src/app/layout.tsx,
+// so the browser knows before this stylesheet loads.
 html {
-  color-scheme: dark;
   background-color: #000000;
 }
 
 /* No background on body: the star layer sits at z-index -1, and a painted body would cover it. */
 body {
-  color: #eeeeee;
+  color: t.$text;
   font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Consolas,
     monospace;
   -webkit-font-smoothing: antialiased;
@@ -29,4 +32,12 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+// One focus ring for every link and button on the site, so keyboard visitors can always see
+// where they are. Links only set their own `border-radius`; the outline follows it.
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid t.$purple-light;
+  outline-offset: 4px;
 }

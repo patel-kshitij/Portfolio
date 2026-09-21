@@ -22,6 +22,12 @@ export interface Section {
   description?: string
   /** Hint for search engines, between 0 and 1. */
   sitemapPriority: number
+  /**
+   * The day this section's words last changed, as YYYY-MM-DD. The sitemap reports it.
+   * Change it when you change the section's content, and not otherwise: a date that
+   * moves on every build tells search engines nothing.
+   */
+  lastModified: string
 }
 
 export const sections: readonly Section[] = [
@@ -31,6 +37,7 @@ export const sections: readonly Section[] = [
     label: 'Home',
     titleWords: [],
     sitemapPriority: 1,
+    lastModified: '2026-09-18',
   },
   {
     id: 'about',
@@ -39,8 +46,9 @@ export const sections: readonly Section[] = [
     titleWords: ['About', 'Me'],
     title: 'About',
     description:
-      'A little about Kshitij Patel: the languages he works in, how he approaches problem solving, and what he does away from the keyboard.',
+      'About Kshitij Patel: a backend developer in Halifax working in Python, TypeScript and AWS, founder of Qrakr Inc., and what he does away from the keyboard.',
     sitemapPriority: 0.8,
+    lastModified: '2026-09-18',
   },
   {
     id: 'projects',
@@ -49,8 +57,9 @@ export const sections: readonly Section[] = [
     titleWords: ['My', 'Projects'],
     title: 'Projects',
     description:
-      'Selected projects by Kshitij Patel, including a Spring and Next.js skill sharing app, a Django marketplace API, and a serverless image processing pipeline.',
+      'Projects by Kshitij Patel: Qrakr, an AI work board for ADHD users, a serverless image pipeline on AWS, and more.',
     sitemapPriority: 0.8,
+    lastModified: '2026-09-18',
   },
   {
     id: 'contact',
@@ -58,8 +67,10 @@ export const sections: readonly Section[] = [
     label: 'Contact',
     titleWords: ['Contact', 'Me'],
     title: 'Contact',
-    description: 'Get in touch with Kshitij Patel by email, or find him on GitHub and LinkedIn.',
+    description:
+      'Get in touch with Kshitij Patel by email, read his resume, or find him on GitHub and LinkedIn.',
     sitemapPriority: 0.6,
+    lastModified: '2026-09-18',
   },
 ]
 
@@ -80,6 +91,15 @@ export function getSection(id: SectionId): Section {
 export function getNextSection(section: Section): Section {
   const index = sections.findIndex((candidate) => candidate.id === section.id)
   return sections[(index + 1) % sections.length]
+}
+
+/**
+ * The section before this one, or undefined on the first section. Unlike the arrow,
+ * going back does not wrap around: the Left key and a swipe to the right stop at Home.
+ */
+export function getPreviousSection(section: Section): Section | undefined {
+  const index = sections.findIndex((candidate) => candidate.id === section.id)
+  return index > 0 ? sections[index - 1] : undefined
 }
 
 /** Whether the section with this id is the last one. False when there is no section. */

@@ -14,6 +14,7 @@ import styles from '@/styles/Stage.module.scss'
 import NextLink from './NextLink'
 import StageTitle from './StageTitle'
 import { intro, swap } from './timing'
+import { INPUT_HINT, useStageInput } from './useStageInput'
 
 /** Which component draws each section's content. */
 const sectionContent: Record<SectionId, ComponentType> = {
@@ -57,6 +58,9 @@ export default function Stage({ children }: { children: ReactNode }) {
     if (!section) router.replace('/')
   }, [section, router])
 
+  // Arrow keys and swipes (decision 17). The key listener is on the window; the swipe handlers go on the card.
+  const input = useStageInput(section)
+
   if (!section) return children
 
   const Content = sectionContent[section.id]
@@ -82,6 +86,7 @@ export default function Stage({ children }: { children: ReactNode }) {
             style={cardStyle}
             data-intro={playIntro ? 'on' : 'off'}
             data-shown={shownId}
+            {...input}
           >
             {playIntro && (
               // Without JavaScript the intro never runs, so show its elements straight away.
@@ -91,9 +96,10 @@ export default function Stage({ children }: { children: ReactNode }) {
             )}
 
             <m.header layout="position" className={styles.header}>
-              <m.div className={styles.icons} {...reveal(intro.icons)}>
+              <m.div className={styles.icons} title={INPUT_HINT} {...reveal(intro.icons)}>
                 <KeyboardIcon className={styles.icon} />
                 <MouseIcon className={styles.icon} />
+                <span className={styles.srOnly}>{INPUT_HINT}</span>
               </m.div>
               <StageTitle words={section.titleWords} />
             </m.header>

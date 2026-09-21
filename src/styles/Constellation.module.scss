@@ -1,0 +1,195 @@
+@use 'tokens' as t;
+
+// The Projects section as a constellation (decision 19): a window onto the sky
+// with one star per project, and a panel for the selected one.
+
+.constellation {
+  @include t.wide-section;
+
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(16rem, 2fr);
+  gap: 1.5rem;
+  align-items: start;
+  max-width: 1100px;
+
+  @media (max-width: t.$bp-medium) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+}
+
+// The window. Same proportions as the drawing space in ProjectsSection.tsx (100 by 60).
+.sky {
+  position: relative;
+  aspect-ratio: 100 / 60;
+  overflow: hidden;
+  border-radius: t.$radius-item;
+  background: radial-gradient(ellipse at 60% 40%, rgba(59, 30, 84, 0.35) 0%, rgba(0, 0, 0, 0.45) 100%);
+}
+
+.lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.dust {
+  fill: t.$text;
+}
+
+.line {
+  stroke: t.$purple-light;
+  // In drawing units (the panel keeps the drawing's proportions, so the stroke scales evenly).
+  // Never add `vector-effect: non-scaling-stroke` here: Motion draws the line with a dash
+  // pattern, and that setting makes browsers measure the dashes in pixels, leaving gaps.
+  stroke-width: 0.2;
+  stroke-opacity: 0.45;
+}
+
+// A star: a button placed by percentage, centred on its point. The button itself is the
+// invisible hit area (at least 32px), the point is what you see.
+.star {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin: -16px 0 0 -16px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: t.$purple-light;
+  font: inherit;
+  cursor: pointer;
+
+  &[data-label='left'] {
+    flex-direction: row-reverse;
+  }
+}
+
+.point {
+  display: block;
+  flex-shrink: 0;
+  margin: 0 auto;
+  border-radius: 50%;
+  background-color: t.$text;
+  box-shadow: 0 0 6px 1px rgba(238, 238, 238, 0.5);
+
+  .star[data-size='1'] & {
+    width: 5px;
+    height: 5px;
+  }
+
+  .star[data-size='2'] & {
+    width: 8px;
+    height: 8px;
+  }
+
+  .star[data-size='3'] & {
+    width: 11px;
+    height: 11px;
+  }
+
+  .star[aria-pressed='true'] & {
+    background-color: t.$purple-light;
+    box-shadow:
+      0 0 8px 2px rgba(212, 190, 228, 0.9),
+      0 0 22px 6px rgba(155, 126, 189, 0.5);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: box-shadow 0.25s ease, background-color 0.25s ease;
+  }
+}
+
+// The name next to each star. Sits outside the 32px hit box on the chosen side.
+.label {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  font-size: 0.75rem;
+  line-height: 1;
+  white-space: nowrap;
+  color: t.$purple;
+  pointer-events: none;
+
+  .star[data-label='right'] & {
+    left: calc(100% - 4px);
+  }
+
+  .star[data-label='left'] & {
+    right: calc(100% - 4px);
+  }
+
+  .star[aria-pressed='true'] &,
+  .star:hover & {
+    color: t.$purple-light;
+  }
+
+  @media (max-width: t.$bp-small) {
+    font-size: 0.6875rem;
+  }
+}
+
+// The selected project. All six are stacked in one cell so the card never changes size.
+.details {
+  display: grid;
+  min-height: 11rem;
+
+  @media (max-width: t.$bp-medium) {
+    min-height: 9.5rem;
+  }
+}
+
+.detail {
+  grid-area: 1 / 1;
+
+  &[data-selected='false'] {
+    visibility: hidden;
+  }
+}
+
+.detailTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: t.$purple-light;
+
+  @media (max-width: t.$bp-medium) {
+    font-size: 1.25rem;
+  }
+}
+
+.detailSummary {
+  @include t.body-text;
+
+  margin: 0 0 0.75rem;
+}
+
+.detailTags {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  font-size: t.$text-min;
+  line-height: 1.5;
+  color: t.$purple;
+  list-style: none;
+
+  li + li::before {
+    content: '\00b7';
+    margin: 0 0.4em;
+  }
+}
+
+.detailLink {
+  @include t.body-text;
+
+  color: t.$purple-light;
+  text-decoration: underline;
+  border-radius: 4px;
+}

@@ -25,6 +25,14 @@ export const swap = {
   arrowGlide: { type: 'spring', bounce: 0, duration: 0.6 },
 } satisfies Record<string, Transition>
 
+/** The Projects constellation (decision 19). */
+export const constellation = {
+  /** The lines draw themselves in when the section arrives. */
+  draw: { duration: 1.2, delay: 0.3, ease: 'easeInOut' },
+  /** The detail panel fades from one project to the next. */
+  swap: { duration: 0.2, ease: 'easeOut' },
+} satisfies Record<string, Transition>
+
 /** The home intro, played once per visit (decision 4). Same timeline as the site had before the stage. */
 export const intro = {
   line: { delay: 0.5, duration: 1.5, ease: 'easeInOut' },

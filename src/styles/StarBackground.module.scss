@@ -15,8 +15,12 @@
     border-radius: 50%;
 }
 
+// Visitors who ask for less motion get a still sky: the stars keep their own
+// brightness and simply stop blinking (docs/product/site.md, point 6).
 .blinking {
-    animation: blinking 1.5s linear infinite alternate;
+    @media (prefers-reduced-motion: no-preference) {
+        animation: blinking 1.5s linear infinite alternate;
+    }
 }
 
 @keyframes blinking {
