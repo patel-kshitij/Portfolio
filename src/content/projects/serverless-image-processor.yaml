@@ -1,0 +1,68 @@
+# Serverless Image Processor. How to edit this file: docs/guides/case-studies.md
+slug: serverless-image-processor
+title: Serverless Image Processor
+summary: An AWS service that resizes, blurs and crops images on request, with no servers to run.
+group: backend
+tags: [AWS Lambda, Step Functions, API Gateway, S3, CloudFormation, Python]
+live:
+code: https://github.com/patel-kshitij/Serverless-Image-Processing
+facts:
+  - Resizes, blurs and crops images through a simple web API
+  - One CloudFormation file builds or removes the whole stack
+  - Retries failed steps up to 3 times and emails on bad requests
+architecture:
+  # One request: along the top from the app to the workflow, down to the bucket and the
+  # Lambdas, and across to the email alert. Laid out so no two arrows cross.
+  boxes:
+    - { id: client, label: Client app, col: 0, row: top }
+    - { id: api, label: API Gateway, col: 1, row: top }
+    - { id: sfn, label: Step Functions, col: 2, row: top }
+    - { id: backup, label: AWS Backup, col: 0, row: bottom }
+    - { id: s3, label: S3 bucket, col: 1, row: bottom }
+    - { id: lambdas, label: Image Lambdas, col: 2, row: bottom }
+    - { id: sns, label: SNS email, col: 3, row: bottom }
+  arrows:
+    - { from: client, to: api, step: 1 }
+    - { from: api, to: s3, step: 2 }
+    - { from: api, to: sfn, step: 3 }
+    - { from: sfn, to: lambdas, step: 4 }
+    - { from: lambdas, to: s3, step: 5 }
+    - { from: sfn, to: sns, step: 6 }
+case_study:
+  published: true
+  intro: A serverless service on AWS that resizes, blurs and crops images when an app asks. It shows how to build an image pipeline that grows with demand and only uses computing power while it works.
+  role: Sole engineer, university cloud computing course project
+  built: January to April 2024
+  problem: |
+    Many apps need to change images. Online stores, social apps and content sites all resize, blur or crop pictures every day. Keeping a server running all day for this wastes money, because the work comes in bursts. Most of the time that server would sit idle, waiting for the next image.
+
+    I built this for my cloud computing course to show a better way. It is a service that photographers, businesses and developers can call over the web. Every part is pay per use, so the processing only runs when there is work.
+  steps:
+    - The app sends a JPEG image to the API.
+    - API Gateway saves the image straight into S3, with no extra code in between.
+    - The app then asks for an edit, such as resize, blur or crop, and API Gateway starts a Step Functions workflow.
+    - The workflow reads the request and hands it to the matching Lambda function, retrying up to 3 times if AWS has a hiccup.
+    - The Lambda edits the image with Pillow and saves the result in its own folder in S3.
+    - If the request asks for an edit the service does not offer, SNS sends me an email alert.
+  decisions:
+    - chose: Step Functions to send each job to the right function
+      over: one big Lambda full of if and else checks, or AWS Glue
+      because: Step Functions shows the whole flow as a picture and has retries and error handling built in. Glue is made for heavy data jobs, which this is not.
+    - chose: three small Lambdas, one per edit
+      over: one Lambda that does every edit
+      because: Each function does one job, so a bug in crop cannot break resize or blur. Adding a new edit takes one new function and one new line in the workflow.
+    - chose: one CloudFormation file for the whole stack
+      over: setting things up by clicking through the AWS console
+      because: Anyone can read the file and build the exact same stack. Deleting the stack removes everything at once, so nothing is left running up a bill.
+  numbers:
+    - value: "6"
+      label: AWS services working together
+    - value: "1"
+      label: Template that builds the whole stack
+    - value: "3"
+      label: Automatic retries when a step fails
+  now: |
+    This was a term project and it is no longer running. It lived in a student AWS account that has since closed.
+
+    The code, the template and the full write up are public on GitHub. The next steps I listed at the time were more image effects, live processing, and automatic testing and deployment.
+  last_modified: 2026-09-21

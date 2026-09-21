@@ -12,7 +12,7 @@ groups:
 order:
   - qrakr
   - workboard
-  - serverless-image-pipeline
+  - serverless-image-processor
   - skillswap
   - ecomart-backend
   - player-performance-prediction
