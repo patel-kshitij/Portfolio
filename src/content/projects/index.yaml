@@ -11,7 +11,7 @@ groups:
 # Every other file in this folder must be listed here, once, by its file name without .yaml.
 order:
   - qrakr
-  - work-board
+  - workboard
   - serverless-image-pipeline
   - skillswap
   - ecomart-backend

@@ -128,6 +128,23 @@ function readArchitecture(raw, report) {
     return link
   })
 
+  // Arrows must not run through other boxes: the drawing routes them in straight lines.
+  const place = new Map(nodes.map((node) => [node.id, node]))
+  links.forEach((link, index) => {
+    const from = place.get(link.from)
+    const to = place.get(link.to)
+    if (!from || !to || !Number.isInteger(from.col) || !Number.isInteger(to.col)) return
+    const where = `arrow ${index + 1} (${link.from} to ${link.to})`
+    if (from.row === to.row) {
+      const low = Math.min(from.col, to.col)
+      const high = Math.max(from.col, to.col)
+      const between = nodes.find((node) => node.row === from.row && node.col > low && node.col < high)
+      if (between) report.error(`${where} runs through the box "${between.id}". Move the boxes so they sit next to each other.`)
+    } else if (Math.abs(from.col - to.col) > 1) {
+      report.error(`${where} goes between the rows across ${Math.abs(from.col - to.col)} columns and would cut across other boxes. Keep it to the same column or the next one.`)
+    }
+  })
+
   return { nodes, links }
 }
 

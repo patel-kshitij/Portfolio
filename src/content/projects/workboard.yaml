@@ -1,0 +1,68 @@
+# Personal AI-workboard. How to edit this file: docs/guides/case-studies.md
+slug: workboard
+title: Personal AI-workboard
+summary: A personal work planner that keeps my time tracking honest and nudges me on my phone.
+group: product
+tags: [Next.js, TypeScript, Supabase, PostgreSQL, pg_cron, Web Push, Vercel]
+live: https://board.patelkshitij.com
+code:
+facts:
+  - Asks every 12 minutes if I am still working
+  - Counts only time I confirmed, never a forgotten timer
+  - Used every day since September 3, 2026
+architecture:
+  # One nudge, drawn as a loop: along the top from the phone to the database and its
+  # minute clock, down to the push route, back along the bottom to the phone.
+  boxes:
+    - { id: phone, label: Your phone, col: 0, row: top }
+    - { id: app, label: Next.js app, col: 1, row: top }
+    - { id: db, label: Supabase DB, col: 2, row: top }
+    - { id: clock, label: Minute clock, col: 3, row: top }
+    - { id: check, label: Timer check, col: 4, row: top }
+    - { id: route, label: Push route, col: 3, row: bottom }
+    - { id: pushsvc, label: Push service, col: 1, row: bottom }
+  arrows:
+    - { from: phone, to: app, step: 1 }
+    - { from: app, to: db, step: 2 }
+    - { from: clock, to: check, step: 3 }
+    - { from: check, to: route, step: 4 }
+    - { from: route, to: pushsvc, step: 5 }
+    - { from: pushsvc, to: phone, step: 6 }
+case_study:
+  published: false
+  intro: Workboard is a personal planner that checks in on me while I work. It only counts time I confirm, so my records stay honest.
+  role: Sole engineer
+  built: 2026 to now
+  problem: |
+    I have ADHD, and I lose track of time. I often forget a timer is running. Normal to do apps then record hours I never really worked. My numbers looked good, but they were not true, so I could not plan my days on them.
+
+    I wanted a planner that nudges me when a block starts, checks in while I work, and only counts time I actually confirmed. It is built for me first, and could open to others later.
+  steps:
+    - I plan my day in blocks and start a timer from my phone or laptop.
+    - The app saves the plan and the running timer in the database.
+    - Every minute, a clock inside the database runs the timer check.
+    - The check finds blocks that are starting, timers that need a "Still working?" question, and ignored timers to stop, then hands the messages to the app.
+    - The app passes each message to the phone's push service.
+    - The notification lands on my phone, and one tap confirms I am still working.
+  decisions:
+    - chose: a clock inside the database
+      over: a scheduled job on Vercel or a separate server
+      because: The database already knows every running timer. Checking right there means one less service to build, pay for, or watch break.
+    - chose: ending an ignored timer at the last confirmed moment
+      over: ending it at the moment it gets stopped
+      because: A forgotten timer would add minutes I never worked. Counting only confirmed time keeps my records honest.
+    - chose: phone notifications through the browser
+      over: building a phone app
+      because: One codebase serves both laptop and phone, with no app store in the way. It let me ship in days instead of weeks.
+  numbers:
+    - value: "19"
+      label: Days in daily use
+    - value: "336"
+      label: Work blocks planned
+    - value: "101"
+      label: Tasks on the board, across 8 tracks
+  now: |
+    I use Workboard every day and keep adding to it.
+
+    Two problems shaped it. Timers left running used to inflate my hours, so a timer now stops itself when I stop answering. On iPhone, notifications once stopped arriving without any warning, until I subscribed again.
+  last_modified: 2026-09-21

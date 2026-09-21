@@ -24,6 +24,8 @@ Everything else is mapped in [docs/INDEX.md](docs/INDEX.md).
 
 Rule files do not load by themselves. Open the one for your area before you change anything there.
 
+If the owner pastes a block that starts with `=== PORTFOLIO HANDOFF v1 ===`, it is project material from another chat. Follow [docs/guides/case-studies.md](docs/guides/case-studies.md), section "Receiving a handoff".
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know
