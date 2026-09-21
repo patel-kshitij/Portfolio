@@ -25,6 +25,12 @@ export const swap = {
   arrowGlide: { type: 'spring', bounce: 0, duration: 0.6 },
 } satisfies Record<string, Transition>
 
+/** The Projects tiles (decision 21). Moving and resizing tiles use the card's spring from `swap.resize`. */
+export const projectsView = {
+  /** A tile, or the headline's content, fades in or out. */
+  swap: { duration: 0.2, ease: 'easeOut' },
+} satisfies Record<string, Transition>
+
 /** The home intro, played once per visit (decision 4). Same timeline as the site had before the stage. */
 export const intro = {
   line: { delay: 0.5, duration: 1.5, ease: 'easeInOut' },

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { caseStudyProjects } from '../src/content/projects'
 
 /**
  * The single page stage, as a visitor sees it (docs/product/site.md).
@@ -92,7 +93,7 @@ test.describe('without JavaScript', () => {
   const pages = [
     { path: '/', title: 'Kshitij Patel', text: GREETING },
     { path: '/about', title: 'About | Kshitij Patel', text: /Problem-solving/ },
-    { path: '/projects', title: 'Projects | Kshitij Patel', text: /Serverless Image Processor/ },
+    { path: '/projects', title: 'Projects | Kshitij Patel', text: /Serverless Image Pipeline/ },
     { path: '/contact', title: 'Contact | Kshitij Patel', text: /The fastest way to reach me/ },
   ]
 
@@ -160,6 +161,167 @@ test('on the last section the arrow sits in the middle and points back', async (
       return placement.fromLeft < placement.fromCentre
     })
     .toBe(true)
+})
+
+test('the Left and Right arrow keys move between sections', async ({ page }) => {
+  await page.goto('/about')
+  await expectSection(page, 'about')
+  await markDocument(page)
+
+  await page.keyboard.press('ArrowRight')
+  await expect(page).toHaveURL('/projects')
+  await expectSection(page, 'projects')
+
+  await page.keyboard.press('ArrowLeft')
+  await expect(page).toHaveURL('/about')
+  await expectSection(page, 'about')
+
+  // Left stops at Home; Right after the last section goes to Home, like the arrow.
+  await page.keyboard.press('ArrowLeft')
+  await expect(page).toHaveURL('/')
+  await expectSection(page, 'home')
+  await page.keyboard.press('ArrowLeft')
+  await expect(page).toHaveURL('/')
+
+  await page.goto('/contact')
+  await expectSection(page, 'contact')
+  await markDocument(page)
+  await page.keyboard.press('ArrowRight')
+  await expect(page).toHaveURL('/')
+  await expectSection(page, 'home')
+  await expectSameDocument(page)
+})
+
+/** A finger travelling `dx` pixels sideways across the card. Positive is to the right. */
+async function swipe(page: Page, dx: number) {
+  const card = page.getByRole('main')
+  const touch = { pointerType: 'touch', isPrimary: true, pointerId: 1, clientX: 300, clientY: 300 }
+  await card.dispatchEvent('pointerdown', touch)
+  await card.dispatchEvent('pointerup', { ...touch, clientX: touch.clientX + dx })
+}
+
+test('a sideways swipe moves between sections, a mouse drag does not', async ({ page }) => {
+  await page.goto('/about')
+  await expectSection(page, 'about')
+
+  await swipe(page, -120)
+  await expect(page).toHaveURL('/projects')
+  await expectSection(page, 'projects')
+
+  await swipe(page, 120)
+  await expect(page).toHaveURL('/about')
+  await expectSection(page, 'about')
+
+  // Too short to count.
+  await swipe(page, -20)
+  await expect(page).toHaveURL('/about')
+
+  // A mouse selecting text must never move the stage.
+  const card = page.getByRole('main')
+  await card.dispatchEvent('pointerdown', { pointerType: 'mouse', isPrimary: true, clientX: 300, clientY: 300 })
+  await card.dispatchEvent('pointerup', { pointerType: 'mouse', isPrimary: true, clientX: 100, clientY: 300 })
+  await expect(page).toHaveURL('/about')
+})
+
+test('Home says what Kshitij is open to, and Contact links the resume', async ({ page, request }) => {
+  await page.goto('/')
+  await expectSection(page, 'home')
+  await expect(page.getByText(/freelance work/)).toBeVisible()
+
+  await page.goto('/contact')
+  await expectSection(page, 'contact')
+  const resume = page.getByRole('link', { name: 'resume' })
+  await expect(resume).toHaveAttribute('href', '/resume.pdf')
+  const response = await request.get('/resume.pdf')
+  expect(response.status()).toBe(200)
+  expect(response.headers()['content-type']).toContain('pdf')
+})
+
+test('the projects are tiles: one headline, groups, and a tile becomes the headline', async ({ page }) => {
+  await page.goto('/projects')
+  await expectSection(page, 'projects')
+
+  // The first project is the headline on arrival, with its drawing and its own link.
+  await expect(page.getByRole('heading', { level: 2, name: 'Qrakr' })).toBeVisible()
+  await expect(page.getByRole('img', { name: /^How Qrakr is wired/ })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'qrakr.com' })).toHaveAttribute('href', 'https://qrakr.com')
+  const tiles = page.getByRole('button', { name: /^Show / })
+  await expect(tiles).toHaveCount(5)
+
+  // A small tile becomes the headline, focus follows it, and the old headline becomes a tile.
+  await page.getByRole('button', { name: 'Show Work Board' }).click()
+  const workBoard = page.getByRole('heading', { level: 2, name: 'Work Board' })
+  await expect(workBoard).toBeVisible()
+  await expect(workBoard).toBeFocused()
+  await expect(page.getByRole('button', { name: 'Show Qrakr' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'board.patelkshitij.com' })).toHaveAttribute('href', /board\.patelkshitij\.com/)
+
+  // A group filter keeps only that group; All brings everything back.
+  const filters = page.getByRole('group', { name: 'Show projects by group' })
+  await filters.getByRole('button', { name: 'Data' }).click()
+  await expect(filters.getByRole('button', { name: 'Data' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('heading', { level: 2, name: 'Player Performance Prediction' })).toBeVisible()
+  await expect(tiles).toHaveCount(0)
+  await filters.getByRole('button', { name: 'All' }).click()
+  await expect(tiles).toHaveCount(5)
+  await expect(workBoard).toBeVisible()
+})
+
+test('a wrong case study address answers 404, then lands on Home', async ({ page }) => {
+  const response = await page.goto('/projects/not-a-project')
+  expect(response?.status()).toBe(404)
+  await expect(page).toHaveURL('/')
+  await expectSection(page, 'home')
+})
+
+// Case studies only exist once they are written (decision 21), so these run for each one there is.
+test.describe('case studies', () => {
+  const studies = caseStudyProjects()
+  test.skip(studies.length === 0, 'No project has a written case study yet.')
+
+  for (const project of studies) {
+    const path = `/projects/${project.slug}`
+
+    test(`${project.title} opens inside the card, and Left goes back to the tiles`, async ({ page }) => {
+      await page.goto('/projects')
+      await expectSection(page, 'projects')
+      await markDocument(page)
+
+      const tile = page.getByRole('button', { name: `Show ${project.title}` })
+      if (await tile.count()) await tile.click()
+      await page.getByRole('link', { name: 'Read the case study' }).click()
+
+      await expect(page).toHaveURL(path)
+      await expect(page.locator('[data-view]')).toHaveAttribute('data-view', `projects/${project.slug}`)
+      await expectSection(page, 'projects')
+      await expect(page.getByRole('heading', { level: 1, name: project.title })).toBeVisible()
+      await expect(page.getByRole('heading', { level: 2, name: 'How it works' })).toBeVisible()
+      await expect(page.getByRole('img', { name: new RegExp(`^How ${project.title} is wired`) })).toBeVisible()
+      await expectSameDocument(page)
+
+      await page.keyboard.press('ArrowLeft')
+      await expect(page).toHaveURL('/projects')
+      await expect(page.locator('[data-view]')).toHaveAttribute('data-view', 'projects')
+      await expectSameDocument(page)
+
+      await page.goBack()
+      await expect(page).toHaveURL(path)
+      await page.getByRole('link', { name: 'All projects' }).click()
+      await expect(page).toHaveURL('/projects')
+      await expectSameDocument(page)
+    })
+
+    test(`${path} arrives as finished HTML with its own title`, async ({ browser }) => {
+      const context = await browser.newContext({ javaScriptEnabled: false })
+      const page = await context.newPage()
+      const response = await page.goto(path)
+      expect(response?.status()).toBe(200)
+      await expect(page).toHaveTitle(`${project.title} case study | Kshitij Patel`)
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', new RegExp(`${path}$`))
+      await expect(page.getByText(project.caseStudy.intro)).toBeVisible()
+      await context.close()
+    })
+  }
 })
 
 test('links that leave the site open in a new tab safely', async ({ page }) => {
