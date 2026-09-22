@@ -1,20 +1,60 @@
 # SkillSwap. How to edit this file: docs/guides/case-studies.md
 slug: skillswap
 title: SkillSwap
-summary: A neighbourhood app for offering and asking for skills.
+summary: A neighbourhood app that matches people who need help with nearby neighbours who have the skill.
 group: backend
-tags: [Java, Spring, Next.js]
+tags: [Java, Spring Boot, Next.js, MySQL, Redis, Docker, GitLab CI]
 live:
 code: https://github.com/patel-kshitij/Skillswap
-facts: []
+facts:
+  - Finds helpers by skill within a distance you choose
+  - Live chat with image sharing, built on Redis and Pusher
+  - Every merge to main was tested, built and deployed by CI
 architecture:
-  # Drafted from the project's sentence and tools; check against the real code (STATUS entry 28).
   boxes:
-    - { id: web, label: Next.js, col: 0, row: top }
-    - { id: api, label: Spring API, col: 1, row: top }
-    - { id: offers, label: Offers, col: 2, row: top }
-    - { id: requests, label: Requests, col: 2, row: bottom }
+    - { id: user, label: User browser, col: 0, row: top }
+    - { id: web, label: Next.js app, col: 1, row: top }
+    - { id: api, label: Spring API, col: 2, row: top }
+    - { id: osm, label: OpenStreetMap, col: 3, row: top }
+    - { id: db, label: MySQL, col: 3, row: bottom }
+    - { id: redis, label: Upstash Redis, col: 1, row: bottom }
+    - { id: pusher, label: Pusher, col: 0, row: bottom }
   arrows:
-    - { from: web, to: api }
-    - { from: api, to: offers }
-    - { from: api, to: requests }
+    - { from: user, to: web, step: 1 }
+    - { from: web, to: api, step: 2 }
+    - { from: api, to: osm, step: 3 }
+    - { from: api, to: db, step: 4 }
+    - { from: api, to: web, step: 5 }
+case_study:
+  published: true
+  intro: SkillSwap helps neighbours find each other. If you need a hand with something, it shows you people nearby who have that skill and lets you chat with them.
+  role: Backend and DevOps engineer in a team of five
+  built: Winter 2024, one university term
+  problem: |
+    People often need help with something small, like fixing a bike or learning a recipe. Someone living a few streets away may have exactly that skill. The two people never find each other, because there is no simple way to search your own neighbourhood by skill.
+
+    SkillSwap fixes that. You sign up with your postal code and your skills. You then search for a skill within a distance you pick, message the person you find, and leave a review afterwards.
+  steps:
+    - A person opens the search, picks a skill and how far away helpers can be.
+    - The web app sends that search to the Spring API.
+    - The API turns the searcher's postal code into map coordinates.
+    - It loads the saved coordinates of other users and keeps those within range who have the skill.
+    - The list of nearby helpers goes back to the web app and shows on screen.
+  decisions:
+    - chose: chat stored in Redis, with Pusher sending new messages live
+      over: chat stored in MySQL through the Spring API
+      because: Chat means many small reads and writes. Keeping each conversation as a time ordered list in Redis made sending and loading messages fast.
+    - chose: looking up each user's coordinates once, when they sign up
+      over: looking up every user's location on each search
+      because: The free map service limits how often you can call it. One lookup per user avoids those limits and keeps searches fast.
+    - chose: a GitLab CI pipeline that builds Docker images and deploys them
+      over: deploying by hand
+      because: With five people merging code, every change to main shipped the same way. Nobody deployed from their own laptop.
+  numbers:
+    - value: "5"
+      label: Automated pipeline stages, from tests to deploy
+  now: |
+    SkillSwap was built for a university course and was finished at the end of the term. The server it ran on is gone, so there is no live version, but the code is public.
+
+    The hardest part was images in chat. The chat could only carry text, and sending pictures was a requirement. I turned each image into bytes and put an "image:" marker in front. When the chat saw that marker, it turned the bytes back into a picture.
+  last_modified: 2026-09-22
