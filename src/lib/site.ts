@@ -17,14 +17,9 @@ export const site = {
   repo: 'https://github.com/patel-kshitij/Portfolio',
   /** The resume served from `public/`. Replace the file, not this path, when the resume changes. */
   resume: '/resume.pdf',
-  /**
-   * What Kshitij is open to, in one value with two lengths (decision 17).
-   * `short` fits under the name on Home; `full` is the sentence on Contact.
-   */
-  availability: {
-    short: 'Looking for my next team, and taking freelance work meanwhile.',
-    full: 'I’m looking for a backend or full-stack team in Canada to join, full-time or part-time. Until then I take freelance and contract work on backends, AWS and websites, so if you have a project, say hello.',
-  },
+  /** What Kshitij is open to, the sentence on Contact (decisions 17 and 25). */
+  availability:
+    'I’m looking for a backend or full-stack team in Canada to join, full-time or part-time. Until then I take freelance and contract work on backends, AWS and websites, so if you have a project, say hello.',
 } as const
 
 /**

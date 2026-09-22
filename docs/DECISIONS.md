@@ -315,3 +315,13 @@ Append-only. Never edit or delete an entry; add a new one that names the entry i
 
 **Why:** A block that describes itself needs no explanation from the owner, and the check catches the layout mistake instead of a person spotting it.
 
+## 25. Home shows only the greeting and the name (2026-09-22)
+
+**Replaces:** the part of entry 17 that put the short availability line under the name on Home. The rest of entry 17 holds.
+
+**Context:** The owner did not like the first page and asked for everything but the greeting and his name to go.
+
+**Decision:** Home's content is only "Hi! I'm" and the name. The availability line now appears only on Contact, so `site.availability` in `src/lib/site.ts` is one sentence instead of a short and a full version. The keyboard and mouse icons, the line and the round arrow stay, because they are the card's frame on every section and the arrow is the only way to move (STATUS entry 14).
+
+**Costs accepted:** A visitor who never leaves Home no longer learns that Kshitij is looking for work.
+

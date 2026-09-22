@@ -15,6 +15,8 @@ Nothing right now.
 
 ## Waiting on the owner
 
+30. **Review the plainer Home** ([DECISIONS.md](DECISIONS.md) entry 25). The availability line under the name is gone; Home shows only the greeting and the name. `site.availability` is now one sentence used on Contact, the Home section's `lastModified` is 2026-09-22, and the e2e test checks that Home holds nothing else. The owner runs every check on macOS, looks at `/` on a real screen and a phone, reviews and commits.
+
 29. **Install the YAML reader and review the move to project files** ([DECISIONS.md](DECISIONS.md) entry 22). `package.json` adds `yaml` 2.9.1 and the `content:build` and `content:check` scripts; the six projects moved from `src/content/projects.ts` to `src/content/projects/`. The owner runs `npm install` so the lockfile changes on his machine, runs all six checks, reviews and commits. Checked in the agent's workspace: every check passes, the checker's error messages were tried with deliberate mistakes, and a published test case study was built and tested, then removed.
 
 27. **Review the projects rebuild** ([DECISIONS.md](DECISIONS.md) entry 21). Built and checked in the agent's workspace: tiles with group filters and a headline, architecture drawings, case study pages inside the card at `/projects/<slug>`, the card resizing through `LayoutGroup`, new e2e tests, and the docs. `npm run typecheck`, `npm run lint`, `npm run build`, `npm run test:e2e` and `npm run docs:check` pass there (the build used a stand-in for the Google font, which that workspace cannot download). The case study page and its tests were checked with a temporary case study that was removed before handover. The owner runs every check on macOS, looks at `/projects` on a real screen and a phone, reviews and commits.
