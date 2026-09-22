@@ -38,7 +38,7 @@ export const sections: readonly Section[] = [
     label: 'Home',
     titleWords: [],
     sitemapPriority: 1,
-    lastModified: '2026-09-18',
+    lastModified: '2026-09-22',
   },
   {
     id: 'about',

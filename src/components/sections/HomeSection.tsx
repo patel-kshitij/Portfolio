@@ -1,7 +1,7 @@
 import { site } from '@/lib/site'
 import styles from '@/styles/Sections.module.scss'
 
-/** Home: the greeting and what Kshitij is open to. The stage adds the icons, line and arrow around it. */
+/** Home: the greeting and the name, nothing else (decision 25). The stage adds the icons, line and arrow around it. */
 export default function HomeSection() {
   return (
     <div className={styles.home}>
@@ -10,7 +10,6 @@ export default function HomeSection() {
         <br />
         <span className={styles.name}>{site.name}</span>
       </h1>
-      <p className={styles.availability}>{site.availability.short}</p>
     </div>
   )
 }

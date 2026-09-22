@@ -223,13 +223,16 @@ test('a sideways swipe moves between sections, a mouse drag does not', async ({ 
   await expect(page).toHaveURL('/about')
 })
 
-test('Home says what Kshitij is open to, and Contact links the resume', async ({ page, request }) => {
+test('Home shows only the greeting, and Contact says what Kshitij is open to and links the resume', async ({ page, request }) => {
   await page.goto('/')
   await expectSection(page, 'home')
-  await expect(page.getByText(/freelance work/)).toBeVisible()
+  const home = page.locator('[data-section="home"]')
+  await expect(home.getByRole('heading', { level: 1, name: GREETING })).toBeVisible()
+  await expect(home).toHaveText(/^\s*Hi! I'm\s*Kshitij Patel\s*$/)
 
   await page.goto('/contact')
   await expectSection(page, 'contact')
+  await expect(page.getByText(/freelance and contract work/)).toBeVisible()
   const resume = page.getByRole('link', { name: 'resume' })
   await expect(resume).toHaveAttribute('href', '/resume.pdf')
   const response = await request.get('/resume.pdf')

@@ -2,20 +2,10 @@
 
 // Content of each section. The stage draws everything around it.
 
-// Home
+// Home: only the greeting and the name (decision 25).
 .home {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-}
-
-// One line under the name, from `site.availability.short` (decision 17).
-.availability {
-  @include t.body-text;
-
-  max-width: 28ch;
-  margin: 0;
-  color: t.$purple-light;
 }
 
 .greeting {

@@ -6,7 +6,7 @@ import styles from '@/styles/Sections.module.scss'
 export default function ContactSection() {
   return (
     <div className={styles.contact}>
-      <p>{site.availability.full}</p>
+      <p>{site.availability}</p>
       <p>
         The fastest way to reach me is by{' '}
         <a href={`mailto:${site.email}`} className={styles.textLink}>
