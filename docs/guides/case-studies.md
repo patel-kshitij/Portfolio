@@ -2,7 +2,7 @@
 title: Projects and case studies
 type: guide
 owner: Kshitij
-reviewed: 2026-09-21
+reviewed: 2026-09-22
 ---
 
 # Projects and case studies
@@ -39,7 +39,7 @@ top:     [User] --> [API] --> [Worker] --> [Storage]
 bottom:             [Login]
 ```
 
-Keep labels to about 14 characters and use at most 8 boxes. The checker refuses an arrow along a row that jumps over another box, and an arrow between the rows that moves more than one column, because both would be drawn straight through a box. On a published case study, number the arrows of one request's path with `step: 1`, `step: 2` and so on; `case_study.steps` needs exactly one sentence per numbered arrow, in the same order. The checker enforces this.
+Two boxes may have an arrow each way, for example a request and its answer; they are drawn as two lines side by side. Keep labels to about 14 characters and use at most 8 boxes. The checker refuses an arrow along a row that jumps over another box, and an arrow between the rows that moves more than one column, because both would be drawn straight through a box. On a published case study, number the arrows of one request's path with `step: 1`, `step: 2` and so on; `case_study.steps` needs exactly one sentence per numbered arrow, in the same order. The checker enforces this.
 
 ## Getting the words: the prompt for another chat
 

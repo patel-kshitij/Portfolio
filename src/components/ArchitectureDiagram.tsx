@@ -6,6 +6,10 @@ import styles from '@/styles/Architecture.module.scss'
 const BOX = { width: 118, height: 34, gapX: 30, pad: 10, rowY: [16, 94] as const }
 /** Dot spacing of the tiny drawing on a small tile. */
 const MINI = { stepX: 36, pad: 12, rowY: [16, 40] as const }
+/** How far apart two arrows between the same boxes are drawn, one each way (decision 26). */
+const PAIR_GAP = 5
+/** How far a paired arrow's step badge sits from the middle of the pair, so both badges show. */
+const PAIR_BADGE = 11
 
 interface ArchitectureDiagramProps {
   architecture: Architecture
@@ -61,8 +65,28 @@ export default function ArchitectureDiagram({ architecture, size, showSteps = fa
   const width = BOX.pad * 2 + maxCol * (BOX.width + BOX.gapX) + BOX.width
   const height = (twoRows ? BOX.rowY[1] : BOX.rowY[0]) + BOX.height + 16
 
-  /** Where an arrow leaves one box and enters the next: side to side on a row, top to bottom between rows. */
+  /** True when another arrow joins the same two boxes in the other direction. */
+  const hasReverse = (from: ArchitectureNode, to: ArchitectureNode) =>
+    architecture.links.some((link) => link.from === to.id && link.to === from.id)
+
+  /**
+   * Where an arrow is drawn. When two boxes have an arrow each way, both lines move
+   * sideways by half of PAIR_GAP, each to its own right-hand side, so they sit side by side
+   * instead of on top of each other (decision 26).
+   */
   const route = (from: ArchitectureNode, to: ArchitectureNode) => {
+    const r = baseRoute(from, to)
+    if (!hasReverse(from, to)) return r
+    const dx = r.x2 - r.x1
+    const dy = r.y2 - r.y1
+    const length = Math.hypot(dx, dy) || 1
+    const ox = (-dy / length) * (PAIR_GAP / 2)
+    const oy = (dx / length) * (PAIR_GAP / 2)
+    return { x1: r.x1 + ox, y1: r.y1 + oy, x2: r.x2 + ox, y2: r.y2 + oy }
+  }
+
+  /** Where an arrow leaves one box and enters the next: side to side on a row, top to bottom between rows. */
+  const baseRoute = (from: ArchitectureNode, to: ArchitectureNode) => {
     const a = at(from)
     const b = at(to)
     if (from.row === to.row) {
@@ -115,8 +139,14 @@ export default function ArchitectureDiagram({ architecture, size, showSteps = fa
           const to = byId.get(link.to)
           if (!from || !to || link.step === undefined) return null
           const r = route(from, to)
-          const cx = (r.x1 + r.x2) / 2
-          const cy = (r.y1 + r.y2) / 2
+          let cx = (r.x1 + r.x2) / 2
+          let cy = (r.y1 + r.y2) / 2
+          if (hasReverse(from, to)) {
+            const length = Math.hypot(r.x2 - r.x1, r.y2 - r.y1) || 1
+            const push = PAIR_BADGE - PAIR_GAP / 2
+            cx += (-(r.y2 - r.y1) / length) * push
+            cy += ((r.x2 - r.x1) / length) * push
+          }
           return (
             <g key={`step-${link.step}`}>
               <circle className={styles.badge} cx={cx} cy={cy} r={9} />
