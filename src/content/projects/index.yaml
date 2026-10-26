@@ -12,6 +12,7 @@ groups:
 order:
   - qrakr
   - workboard
+  - fund-notices
   - serverless-image-processor
   - skillswap
   - ecomart-backend

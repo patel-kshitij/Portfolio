@@ -60,7 +60,7 @@ export const sections: readonly Section[] = [
     description:
       'Projects by Kshitij Patel: qrakr, an AI work board for ADHD users, a serverless image pipeline on AWS, and more.',
     sitemapPriority: 0.8,
-    lastModified: '2026-09-21',
+    lastModified: '2026-10-26',
   },
   {
     id: 'contact',

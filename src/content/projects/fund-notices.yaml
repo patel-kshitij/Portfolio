@@ -1,0 +1,74 @@
+# Fund Notices. How to edit this file: docs/guides/case-studies.md
+slug: fund-notices
+title: Fund Notices
+summary: A local AI tool that reads fund notices, pulls out the numbers, checks they add up, and flags doubtful ones.
+group: data
+tags: [Python, Ollama, "qwen3:4b", scikit-learn, MiniLM, Pydantic, pypdf, Streamlit]
+live:
+code: https://github.com/patel-kshitij/Fund_Notices
+facts:
+  - Runs on a laptop, so no document leaves the machine
+  - Copies each number as printed, then checks the math
+  - Caught all 6 planted math errors in testing
+architecture:
+  # One document, start to finish. Along the top it is read, sorted, given a worked example
+  # and filled in by the local model. It drops to the math checks, and along the bottom it
+  # reaches a person when a check fails or the two opinions on its type disagree.
+  boxes:
+    - { id: pdf, label: Inbox PDF, col: 0, row: top }
+    - { id: reader, label: Text reader, col: 1, row: top }
+    - { id: sorter, label: Type sorter, col: 2, row: top }
+    - { id: example, label: Example finder, col: 3, row: top }
+    - { id: model, label: Local AI model, col: 4, row: top }
+    - { id: second, label: Second opinion, col: 2, row: bottom }
+    - { id: review, label: Person review, col: 3, row: bottom }
+    - { id: checks, label: Math checks, col: 4, row: bottom }
+  arrows:
+    - { from: pdf, to: reader, step: 1 }
+    - { from: reader, to: sorter, step: 2 }
+    - { from: reader, to: second, step: 3 }
+    - { from: sorter, to: example, step: 4 }
+    - { from: example, to: model, step: 5 }
+    - { from: model, to: checks, step: 6 }
+    - { from: checks, to: review, step: 7 }
+    - { from: second, to: review, step: 8 }
+case_study:
+  published: false
+  intro: Fund Notices sorts the capital calls, distribution notices and invoices that fill a fund administrator's inbox, copies out their key numbers and checks that they add up. It runs on a laptop with a local model, so no document ever leaves the machine.
+  role: Sole engineer
+  built: October 2026
+  problem: |
+    A fund administrator does the paperwork for investment funds. Its inbox fills with PDFs: capital calls that ask investors for money, distribution notices that pay money out, and invoices from vendors. Each one has to be sorted, its key numbers copied out, and those numbers checked.
+
+    Real notices are confidential, so the tool runs on a laptop with a local model and no document leaves the machine. It was built and tested only on synthetic documents with invented names, and every page says so. A document goes to a person only when something looks wrong.
+  steps:
+    - pypdf pulls the text out of the PDF, and every later step works on that text.
+    - A TF-IDF and logistic regression classifier sorts it as a capital call, a distribution notice or an invoice.
+    - MiniLM embeddings find the closest training document, and its type is a second opinion.
+    - TF-IDF word scores pick the most similar training document of that type, with its true answer, as a worked example.
+    - qwen3:4b, running on the laptop through Ollama, fills in the fields using the worked example, and Pydantic checks its reply, with one retry.
+    - Exact Decimal sums check that the parts add up to each total, and a missing number counts as a problem.
+    - A failed check sends the document to a person, along with the rule that broke.
+    - The document also goes to a person if the type sorter and the second opinion disagree, or if extraction fails twice.
+  decisions:
+    - chose: qwen3:4b as the local model
+      over: llama3.2:3b
+      because: I tried both on a few training documents. llama3.2 changed digits inside money amounts, and a changed digit looks like a real number, so a correct notice would fail its checks.
+    - chose: copying every number exactly as the page prints it
+      over: letting the extractor fix numbers that look wrong
+      because: If extraction fixed a mistake, the math checks would never see it and a wrong notice would pass. So the schema checks types only, and a retry never pushes the model to change a number.
+    - chose: a second opinion from a different method
+      over: a confidence cutoff on the classifier
+      because: On the training set, the classifier's probabilities were low even when it was right, so any cutoff would have been a guess. A disagreement between two different methods needs no tuning.
+  numbers:
+    - value: "45/45"
+      label: Test documents read with every field right
+    - value: "6/6"
+      label: Planted math errors caught, with no false alarms
+    - value: "22 seconds"
+      label: Model time per document on an 8 GB laptop
+  now: |
+    The pipeline is finished and runs end to end on an 8 GB MacBook Air. A small demo page shows the PDF next to what the tool found. Every number here comes from the evaluate command, which writes the results page itself.
+
+    The scores come from synthetic documents made by one generator with three page layouts per type, so they show the method works on this data, not on a real inbox. Next ideas are a larger model where memory allows, more page layouts, and a review queue that says which number looks wrong.
+  last_modified: 2026-10-26
