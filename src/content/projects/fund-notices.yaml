@@ -33,7 +33,7 @@ architecture:
     - { from: checks, to: review, step: 7 }
     - { from: second, to: review, step: 8 }
 case_study:
-  published: false
+  published: true
   intro: Fund Notices sorts the capital calls, distribution notices and invoices that fill a fund administrator's inbox, copies out their key numbers and checks that they add up. It runs on a laptop with a local model, so no document ever leaves the machine.
   role: Sole engineer
   built: October 2026
